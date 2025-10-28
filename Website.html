@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Bot - Roblox Studio AI Plugin</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind Configuration for deep blue theme and glassmorphism -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-accent': '#3B82F6', // Blue 500
+                        'primary-bg': '#0F172A',    // Slate 900 (Deep Dark Blue)
+                        'secondary-bg': 'rgba(30, 41, 59, 0.8)', // Slate 800 with transparency
+                        'text-light': '#F1F5F9',    // Slate 100
+                        'text-muted': '#94A3B8',    // Slate 400
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for background and glassmorphism */
+        body {
+            background-color: #0F172A; 
+            color: #F1F5F9;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Glassmorphism Effect Class */
+        .glass {
+            background-color: rgba(30, 41, 59, 0.5); /* Semi-transparent dark background */
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border: 1px solid rgba(59, 130, 246, 0.3); /* Accent border */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Style for the main CTA button - Blue Glow */
+        .cta-button {
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.7);
+            background-color: #2563EB; /* Slightly darker blue on hover */
+        }
+
+        /* Styling for the play button overlay */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+        .video-thumbnail:hover .play-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        .play-icon {
+            fill: white;
+            opacity: 0.9;
+            width: 60px;
+            height: 60px;
+            transition: transform 0.3s;
+        }
+        .video-thumbnail:hover .play-icon {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header & Navigation -->
+    <header class="p-4 md:p-6 glass sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-extrabold text-primary-accent tracking-tighter">Builder Bot</a>
+            <nav class="hidden md:flex space-x-6 text-text-light">
+                <a href="#features" class="hover:text-primary-accent transition duration-200">Features</a>
+                <a href="#demo" class="hover:text-primary-accent transition duration-200">Demo</a>
+                <a href="#pricing" class="hover:text-primary-accent transition duration-200">Pricing</a>
+            </nav>
+            <!-- Direct link to purchase page -->
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="md:hidden bg-primary-accent text-text-light px-4 py-2 rounded-lg font-bold hover:bg-blue-600 transition duration-200 shadow-md">
+                Buy $4.99
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-16 md:py-24 text-center max-w-4xl mx-auto px-4">
+        <span class="text-sm font-semibold text-primary-accent glass px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-md">
+            The Ultimate Roblox Studio AI Plugin
+        </span>
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 text-text-light">
+            **Builder Bot**: Your <span class="text-primary-accent">AI Co-Developer</span>.
+        </h1>
+        <p class="text-xl text-text-muted mb-8 max-w-2xl mx-auto">
+            Instantly generate clean Lua code, debug tricky issues, and prototype your game ideas faster than ever before, right inside Roblox Studio.
+        </p>
+        <!-- Direct link to purchase page -->
+        <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button bg-primary-accent text-text-light text-xl font-bold py-3 px-10 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
+            Get Builder Bot - $4.99 One-Time
+        </a>
+        <p class="text-text-muted text-sm mt-4">Lifetime license with **4+ years of guaranteed updates**.</p>
+    </section>
+
+    <!-- Video Demo Section -->
+    <section id="demo" class="py-16 md:py-20 bg-secondary-bg">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">See Builder Bot in Action</h2>
+            <p class="text-lg text-text-muted mb-8 max-w-2xl mx-auto">
+                Click the image below to watch the official demo of the **Car Spawn System** being created!
+            </p>
+            
+            <div class="mx-auto w-full max-w-4xl glass p-4">
+                <!-- YouTube Thumbnail Link Replacement to fix error 153 -->
+                <a href="https://youtu.be/t4lywaYf4b4?si=ar3p5xLPupOrnATM" target="_blank" class="block relative rounded-xl overflow-hidden shadow-2xl video-thumbnail">
+                    <!-- YouTube high-quality thumbnail (mqdefault is a good standard size) -->
+                    <img 
+                        src="https://img.youtube.com/vi/t4lywaYf4b4/hqdefault.jpg" 
+                        alt="Builder Bot Car Spawn System Demo" 
+                        class="w-full h-auto object-cover" 
+                        onerror="this.onerror=null; this.src='https://placehold.co/1280x720/1E293B/94A3B8?text=BUILDER+BOT+DEMO';" 
+                    />
+                    <!-- Play Button Overlay -->
+                    <div class="play-overlay">
+                        <svg class="play-icon" viewBox="0 0 24 24">
+                            <path d="M6 3L18 12L6 21V3Z" stroke-width="2" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+            
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="inline-block mt-6 cta-button bg-primary-accent text-text-light font-bold py-3 px-8 rounded-xl hover:bg-blue-600 transition duration-300">
+                Buy Builder Bot Now
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 md:py-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Key Capabilities</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1: Code Generation -->
+                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        <h3 class="text-xl font-semibold text-text-light">Instant Lua Scripting</h3>
+                    </div>
+                    <p class="text-text-muted">Turn simple English commands into clean, efficient Lua code in seconds. Write entire systems, like car spawners, with ease.</p>
+                </div>
+
+                <!-- Feature 2: Debugging -->
+                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <h3 class="text-xl font-semibold text-text-light">Smart Error Fixer</h3>
+                    </div>
+                    <p class="text-text-muted">Analyze errors in your scripts and get immediate, context-aware suggestions and fixes directly in the Studio console.</p>
+                </div>
+
+                <!-- Feature 3: Asset Suggestion -->
+                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.976v0A5.002 5.002 0 009 5.002h1a5.002 5.002 0 004.855 4.854L17.7 13.3"></path></svg>
+                        <h3 class="text-xl font-semibold text-text-light">Contextual Modeling</h3>
+                    </div>
+                    <p class="text-text-muted">Suggests relevant, high-quality models and assets from the Creator Marketplace based on your current project.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-16 md:py-20 max-w-3xl mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Get the Builder Bot Advantage Today</h2>
+        <p class="text-xl text-text-muted mb-12">An incredible value: one payment, years of use.</p>
+
+        <!-- Pricing Card -->
+        <div class="glass p-8 rounded-2xl border-4 border-primary-accent/50 w-full">
+            <p class="text-sm font-semibold uppercase text-primary-accent mb-2">LIFETIME DEVELOPER LICENSE</p>
+            <div class="flex items-end justify-center mb-6">
+                <span class="text-5xl font-extrabold text-text-light">$4</span>
+                <span class="text-2xl font-bold text-text-light">.99</span>
+                <span class="text-xl text-text-muted ml-2">/ one-time</span>
+            </div>
+            <p class="text-text-muted mb-8">Includes all current features, unlimited use, and prioritized support.</p>
+
+            <ul class="text-left space-y-3 text-text-light mb-10">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Unlimited AI Code & Debugging
+                </li>
+                <li class="flex items-center font-bold text-primary-accent">
+                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    **4+ Years of Guaranteed Feature Updates**
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Direct Access to Developer Community
+                </li>
+            </ul>
+
+            <!-- Direct link to purchase page -->
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button w-full bg-primary-accent text-text-light text-xl font-bold py-4 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
+                Buy Builder Bot on Roblox Creator Store
+            </a>
+            <p class="text-text-muted text-sm mt-3">
+                Purchase is secure and processed through the Roblox platform.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm text-text-muted">&copy; 2025 Builder Bot Developers. The Builder Bot plugin is an independent developer tool and is not officially affiliated with Roblox Corporation.</p>
+            <div class="flex justify-center space-x-6 mt-4 text-text-muted text-sm">
+                <a href="#" class="hover:text-primary-accent">Support</a>
+                <a href="#" class="hover:text-primary-accent">Terms of Service</a>
+                <a href="#" class="hover:text-primary-accent">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
