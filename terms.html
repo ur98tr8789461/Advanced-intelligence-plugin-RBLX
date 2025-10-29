@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Bot | Terms of Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for background and glassmorphism */
+        body {
+            background-color: #0F172A; 
+            color: #F1F5F9;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Glassmorphism Effect Class */
+        .glass {
+            background-color: rgba(30, 41, 59, 0.5); /* Semi-transparent dark background */
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border: 1px solid rgba(59, 130, 246, 0.3); /* Accent border */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Style for the main CTA button - Blue Glow */
+        .cta-button {
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 6px 20px rgba(44, 56, 75, 0.5);
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.7);
+            background-color: #2563EB; /* Slightly darker blue on hover */
+        }
+        
+        /* New styles for better terms section readability */
+        .terms-section {
+            border-left: 3px solid #3B82F6; /* Primary blue accent line */
+            padding-left: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left; /* Aligns the legal text to the left */
+        }
+
+        .terms-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #93C5FD; /* Lighter blue for section headers */
+            margin-bottom: 0.75rem;
+        }
+
+        .terms-list li {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        .terms-list ul {
+            margin-top: 0.5rem;
+            margin-left: 1.5rem;
+            list-style-type: disc; /* Use discs for sub-points */
+        }
+        .prohibited {
+            color: #F87171; /* Use a strong but contained red for emphasis */
+            font-weight: 600;
+        }
+        /* Style for the list of main terms */
+        .main-terms-list {
+            counter-reset: term-counter;
+        }
+        .main-terms-list > li {
+            counter-increment: term-counter;
+            font-size: 1.125rem; /* Larger text for main points */
+            font-weight: 500;
+            color: #E2E8F0;
+        }
+        .main-terms-list > li::before {
+            content: counter(term-counter) ". ";
+            font-weight: 700;
+            color: #3B82F6; /* Blue numbering */
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="p-4 md:p-6 glass sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <img src="1000115372.png" alt="Builder Bot Logo" class="logo-img rounded-full w-8 h-8">
+                <span class="text-2xl font-extrabold tracking-tighter text-text-light">Builder Bot</span>
+            </a>
+            
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="md:hidden bg-blue-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-600 transition duration-200 shadow-md">
+                Buy $4.99
+            </a>
+        </div>
+    </header>
+
+    <section class="py-16 md:py-24 max-w-4xl mx-auto px-4">
+        <div class="text-center">
+            <span class="text-sm font-semibold text-blue-400 glass px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-md">
+                Legal Notice
+            </span>
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 text-white">
+                Builder Bot: <span class="text-blue-500">Terms of Service</span>.
+            </h1>
+            <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+                Last Updated: October 29, 2025
+                <br class="hidden sm:block">
+                By purchasing, downloading, or using Builder Bot, you acknowledge and agree to be bound by the following terms and conditions (the "Agreement").
+            </p>
+        </div>
+
+        <div class="terms-section glass p-8 rounded-xl">
+            <h2 class="text-2xl font-bold mb-4">Acceptable Use Policy</h2>
+            <p class="text-gray-300 mb-6">
+                Your right to use Builder Bot is subject to and conditioned upon your compliance with these Terms of Service. Any violation may result in the immediate and permanent termination of your license.
+            </p>
+            <ol class="main-terms-list space-y-6 text-gray-300 terms-list">
+                <li>
+                    Compliance with Law. You agree to use Builder Bot only in accordance with all applicable local, state, national, and international laws and regulations.
+                </li>
+                <li>
+                    Restrictions on Modification and Reverse Engineering. You are expressly prohibited from modifying, adapting, translating, or creating derivative works of the Builder Bot code. This restriction includes, but is not limited to: 
+                    <ul class="list-none terms-list text-gray-400 mt-2">
+                        <li class="prohibited before:content-['•'] before:mr-2">Decompiling, disassembling, or otherwise attempting to extract the source code.</li>
+                        <li class="prohibited before:content-['•'] before:mr-2">Reverse engineering the product or any part thereof.</li>
+                        <li class="prohibited before:content-['•'] before:mr-2">Utilizing the code or its components for any purpose other than its intended function as a Roblox AI assist tool.</li>
+                    </ul>
+                </li>
+                <li>
+                    No Resale or Distribution.The license granted is personal and non-transferable. You shall not sublicense, resell, lease, distribute, or otherwise transfer Builder Bot to any third party without express written permission from the licensor.
+                </li>
+            </ol>
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button bg-blue-500 text-white text-xl font-bold py-3 px-10 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
+                Secure Your Lifetime License - $4.99
+            </a>
+            <p class="text-gray-400 text-sm mt-4">Lifetime license with <span class="font-bold text-white">4+ years of guaranteed updates & patches</span>.</p>
+
+            <div class="mt-6 inline-flex items-center space-x-2 text-green-400 bg-green-900/40 px-4 py-2 rounded-full font-semibold glass">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.108a9 9 0 10-14.76 4.31M15.11 12.58h.01M19.11 12.58h.01"></path></svg>
+                <span class="text-sm">30-Day Money-Back Guarantee. Risk-Free Purchase!</span>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

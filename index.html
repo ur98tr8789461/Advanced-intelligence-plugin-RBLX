@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Bot - Roblox Studio AI Plugin</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind Configuration for deep blue theme and glassmorphism -->
+   <style>
+    /* Custom styles for background and glassmorphism */
+body {
+    background-color: #0F172A; 
+    color: #F1F5F9;
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* Glassmorphism Effect Class */
+.glass {
+    background-color: rgba(30, 41, 59, 0.5); /* Semi-transparent dark background */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(59, 130, 246, 0.3); /* Accent border */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Style for the main CTA button - Blue Glow */
+.cta-button {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 6px 20px rgba(44, 56, 75, 0.5);
+}
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.7);
+    background-color: #2563EB; /* Slightly darker blue on hover */
+}
+
+/* Styling for the play button overlay */
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s;
+}
+.video-thumbnail:hover .play-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+.play-icon {
+    fill: white;
+    opacity: 0.9;
+    width: 60px;
+    height: 60px;
+    transition: transform 0.3s;
+}
+.video-thumbnail:hover .play-icon {
+    transform: scale(1.1);
+}
+
+   </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header & Navigation -->
+    <header class="p-4 md:p-6 glass sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- Logo area using the actual uploaded image -->
+            <a href="#" class="flex items-center space-x-2">
+                <img src="1000115372.png" alt="Builder Bot Logo" class="logo-img rounded-full w-8 h-8">
+                <span class="text-2xl font-extrabold text-text-light tracking-tighter">Builder Bot</span>
+            </a>
+            <nav class="hidden md:flex space-x-6 text-text-light">
+                <a href="#how-it-works" class="hover:text-primary-accent transition duration-200">How It Works</a>
+                <a href="#features" class="hover:text-primary-accent transition duration-200">Features</a>
+                <a href="#examples" class="hover:text-primary-accent transition duration-200">Examples</a>
+                <a href="#demo" class="hover:text-primary-accent transition duration-200">Demo</a>
+                <a href="#faq" class="hover:text-primary-accent transition duration-200">FAQ</a>
+                <a href="#pricing" class="hover:text-primary-accent transition duration-200">Pricing</a>
+            </nav>
+            <!-- Direct link to purchase page -->
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="md:hidden bg-primary-accent text-text-light px-4 py-2 rounded-lg font-bold hover:bg-blue-600 transition duration-200 shadow-md">
+                Buy $4.99
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-16 md:py-24 text-center max-w-4xl mx-auto px-4">
+        <span class="text-sm font-semibold text-primary-accent glass px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-md">
+            The Ultimate Roblox Studio AI Plugin
+        </span>
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 text-text-light">
+            Builder Bot: Your <span class="text-primary-accent">AI Co-Developer</span>.
+        </h1>
+        <p class="text-xl text-text-muted mb-8 max-w-2xl mx-auto">
+            Instantly generate clean Lua code, debug tricky issues, and prototype your game ideas faster than ever before, right inside Roblox Studio.
+        </p>
+        <!-- Direct link to purchase page -->
+        <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button bg-primary-accent text-text-light text-xl font-bold py-3 px-10 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
+            Get Builder Bot - $4.99 One-Time
+        </a>
+        <p class="text-text-muted text-sm mt-4">Lifetime license with <span class="font-bold">4+ years of guaranteed updates & Patches </span>.</p>
+
+        <!-- New Guarantee Badge -->
+        <div class="mt-6 inline-flex items-center space-x-2 text-success-green bg-success-green/10 px-4 py-2 rounded-full font-semibold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.108a9 9 0 10-14.76 4.31M15.11 12.58h.01M19.11 12.58h.01"></path></svg>
+            <span class="text-sm">30-Day Money-Back Guarantee. Risk-Free Purchase!</span>
+        </div>
+    </section>
+
+    <!-- How It Works Section (Vertical line removed) -->
+    <section id="how-it-works" class="py-16 md:py-20">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">How Builder Bot Speeds Up Your Workflow</h2>
+            <p class="text-lg text-text-muted mb-12 max-w-2xl mx-auto">
+                Go from idea to functional code in three simple steps.
+            </p>
+
+            <div class="flex flex-col md:flex-row justify-center md:space-x-8 space-y-8 md:space-y-0">
+                <!-- Step 1 -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-accent text-text-light text-xl font-bold mb-4 shadow-xl">1</div>
+                    <div class="glass p-6 rounded-xl w-full max-w-sm hover:border-primary-accent/80 transition duration-300">
+                        <h3 class="text-xl font-semibold mb-2">Prompt the Bot</h3>
+                        <p class="text-text-muted">Type your request in plain English into the Builder Bot window inside Roblox Studio (e.g., "Make a script that opens a door when a player touches it").</p>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-accent text-text-light text-xl font-bold mb-4 shadow-xl">2</div>
+                    <div class="glass p-6 rounded-xl w-full max-w-sm hover:border-primary-accent/80 transition duration-300">
+                        <h3 class="text-xl font-semibold mb-2">Review and Insert</h3>
+                        <p class="text-text-muted">Builder Bot instantly generates clean, commented Lua code. Review the output, make minor tweaks if needed, and click 'Insert'.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-accent text-text-light text-xl font-bold mb-4 shadow-xl">3</div>
+                    <div class="glass p-6 rounded-xl w-full max-w-sm hover:border-primary-accent/80 transition duration-300">
+                        <h3 class="text-xl font-semibold mb-2">Publish and Play</h3>
+                        <p class="text-text-muted">Your game systems are now functional! Focus on design and gameplay while Builder Bot handles the heavy scripting.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Section: Code Examples in Seconds -->
+    <section id="examples" class="py-16 md:py-20 bg-secondary-bg">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Code Examples in Seconds</h2>
+            <p class="text-lg text-text-muted text-center mb-12 max-w-3xl mx-auto">
+                Stop wasting hours on boilerplate code. Here are just a few systems Builder Bot can generate instantly.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Example 1: Door Script -->
+                <div class="p-6 rounded-xl glass hover:shadow-lg transition duration-300">
+                    <div class="text-2xl mb-3 text-primary-accent">
+                        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6-6v4m0 0h12m0-4v-4m0 4h-3m-6 0H6m-6 0v4m0 0h12m0-4v-4m0 4h3m-6 0H6"></path></svg>
+                        Door System
+                    </div>
+                    <p class="text-text-muted">Prompt: **Make a sliding door open and close when touched.**</p>
+                </div>
+
+                <!-- Example 2: Coin Collection -->
+                <div class="p-6 rounded-xl glass hover:shadow-lg transition duration-300">
+                    <div class="text-2xl mb-3 text-primary-accent">
+                        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15v2m-4-2v4m0 0h12m0-4v-4m0 4h-3m-6 0H6m-6 0v4m0 0h12m0-4v-4m0 4h3m-6 0H6"></path></svg>
+                        Coin/Currency System
+                    </div>
+                    <p class="text-text-muted">Prompt: **Script a part to delete on touch and give the player 5 cash.**</p>
+                </div>
+
+                <!-- Example 3: Camera Effects -->
+                <div class="p-6 rounded-xl glass hover:shadow-lg transition duration-300">
+                    <div class="text-2xl mb-3 text-primary-accent">
+                        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.865-1.297a2 2 0 011.664-.89h.865a2 2 0 011.664.89l.865 1.297a2 2 0 001.664.89H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Camera Control
+                    </div>
+                    <p class="text-text-muted">Prompt: **Create a script that shakes the camera for 3 seconds on a spawn event.**</p>
+                </div>
+
+                <!-- Example 4: Teleport Script -->
+                <div class="p-6 rounded-xl glass hover:shadow-lg transition duration-300">
+                    <div class="text-2xl mb-3 text-primary-accent">
+                        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20a8 8 0 008-8m-8 8a8 8 0 01-8-8m8 8v2m-8-8a8 8 0 1116 0m-16 0h2.5M19 12h2.5m-19 0h2.5"></path></svg>
+                        Teleporter Pad
+                    </div>
+                    <p class="text-text-muted">Prompt: **Make a simple teleporter to send players from Part A to Part B on collision.**</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 md:py-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Developers Are Loving Builder Bot</h2>
+            <p class="text-lg text-text-muted mb-12 max-w-2xl mx-auto">
+                The fastest way to eliminate scripting bottlenecks.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="p-6 rounded-xl glass text-left">
+                    <p class="text-xl italic mb-4 text-text-light">"This cut my development time in half. Debugging is so easy with this tool"</p>
+                    <p class="text-primary-accent font-semibold">— Experienced Developer</p>
+                    <p class="text-sm text-text-muted">- Deon </p>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="p-6 rounded-xl glass text-left">
+                    <p class="text-xl italic mb-4 text-text-light">"I'm not a Lua expert, but Builder Bot lets me create complex mechanics instantly. Worth every penny."</p>
+                    <p class="text-primary-accent font-semibold">— Small Content Creator</p>
+                    <p class="text-sm text-text-muted">- Delvin </p>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="p-6 rounded-xl glass text-left">
+                    <p class="text-xl italic mb-4 text-text-light">"The 4-year update guarantee is the best part. For Longterms use this is the best tool."</p>
+                    <p class="text-primary-accent font-semibold">— Lead Programmer</p>
+                    <p class="text-sm text-text-muted">- Noah </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Discord Link Section -->
+    <section class="py-16 md:py-20 bg-secondary-bg">
+        <div class="max-w-3xl mx-auto px-4 text-center glass p-8 rounded-2xl">
+            <h2 class="text-3xl font-bold mb-4">Join the Builder Bot Community!</h2>
+            <p class="text-lg text-text-muted mb-8">
+                Get instant support, share your creations, and talk directly to the developers.
+            </p>
+            <a href="https://discord.gg/yydzPUDMBX" target="_blank" class="cta-button bg-primary-accent text-text-light text-xl font-bold py-3 px-10 rounded-xl hover:bg-blue-600 transition duration-300 inline-flex items-center space-x-2">
+                <!-- Discord Icon SVG -->
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.001 4.908c-3.774 0-7.234 1.77-9.619 4.811c-.085.114-.087.26-.005.378c.843 1.258 1.94 2.378 3.235 3.393c.311.246.65.466.994.673c-.046.068-.088.139-.126.213c-.886 1.767-1.42 3.657-1.493 5.611c-.004.108.056.213.155.253c.1.041.214.004.283-.086c.307-.398.665-.775 1.055-1.127c.48.291.996.536 1.536.726c.074.026.15.039.226.039c.07 0 .139-.012.206-.033c2.518.777 5.254.777 7.772 0c.067.02.136.033.206.033c.077 0 .152-.013.226-.039c.54-.19 1.056-.435 1.535-.726c.39.351.748.729 1.055 1.127c.069.09.183.127.283.086c.099-.04.159-.145.155-.253c-.073-1.954-.607-3.844-1.493-5.611c-.038-.074-.08-.145-.126-.213c.344-.207.683-.427.994-.673c1.295-1.015 2.392-2.135 3.235-3.393c.082-.118.08-.264-.005-.378c-2.384-3.04-5.844-4.811-9.619-4.811zm-3.018 7.37c-.779 0-1.409.63-1.409 1.409s.63 1.409 1.409 1.409s1.409-.63 1.409-1.409s-.63-1.409-1.409-1.409zm6.036 0c-.779 0-1.409.63-1.409 1.409s.63 1.409 1.409 1.409s1.409-.63 1.409-1.409s-.63-1.409-1.409-1.409z"/></svg>
+                <span>Join Discord for Support</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Video Demo Section -->
+    <section id="demo" class="py-16 md:py-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">See Builder Bot in Action</h2>
+            <p class="text-lg text-text-muted mb-8 max-w-2xl mx-auto">
+                Click the image below to watch the official demo of the <span class="font-semibold">Car Spawn System</span> being created!
+            </p>
+            
+            <div class="mx-auto w-full max-w-4xl glass p-4">
+                <!-- YouTube Thumbnail Link Replacement to avoid error 153 -->
+                <a href="https://youtu.be/t4lywaYf4b4?si=ar3p5xLPupOrnATM" target="_blank" class="block relative rounded-xl overflow-hidden shadow-2xl video-thumbnail">
+                    <!-- YouTube high-quality thumbnail (mqdefault is a good standard size) -->
+                    <img 
+                        src="https://img.youtube.com/vi/t4lywaYf4b4/hqdefault.jpg" 
+                        alt="Builder Bot Car Spawn System Demo" 
+                        class="w-full h-auto object-cover" 
+                        onerror="this.onerror=null; this.src='https://placehold.co/1280x720/1E293B/94A3B8?text=BUILDER+BOT+DEMO';" 
+                    />
+                    <!-- Play Button Overlay -->
+                    <div class="play-overlay">
+                        <svg class="play-icon" viewBox="0 0 24 24">
+                            <path d="M6 3L18 12L6 21V3Z" stroke-width="2" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 md:py-20 bg-secondary-bg">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Key Capabilities</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1: Code Generation -->
+                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        <h3 class="text-xl font-semibold text-text-light">Instant Lua Scripting</h3>
+                    </div>
+                    <p class="text-text-muted">Turn simple English commands into clean, efficient Lua code in seconds. Write entire systems, like car spawners, with ease.</p>
+                </div>
+
+                <!-- Feature 2: Debugging -->
+                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <h3 class="text-xl font-semibold text-text-light">Smart Error Fixer</h3>
+                    </div>
+                    <p class="text-text-muted">Analyze errors in your scripts and get immediate, context-aware suggestions and fixes directly in the Studio console.</p>
+                </div>
+
+                <!-- Feature 3: Asset Suggestion (Cloud Icon) -->
+                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.976v0A5.002 5.002 0 009 5.002h1a5.002 5.002 0 004.855 4.854L17.7 13.3"></path></svg>
+                        <h3 class="text-xl font-semibold text-text-light">Contextual Modeling</h3>
+                    </div>
+                    <p class="text-text-muted">Suggests relevant, high-quality models and assets from the Creator Marketplace based on your current project.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section id="faq" class="py-16 md:py-20">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="glass p-5 rounded-xl transition duration-300">
+                    <h3 class="text-lg font-semibold text-text-light mb-2">How do I install Builder Bot?</h3>
+                    <p class="text-text-muted">After purchasing on the Roblox Creator Store, the plugin will automatically install in your Roblox Studio toolbox. Restart Studio if you don't see it immediately.</p>
+                </div>
+                <!-- FAQ Item 2 -->
+                <div class="glass p-5 rounded-xl transition duration-300">
+                    <h3 class="text-lg font-semibold text-text-light mb-2">What languages does the AI support?</h3>
+                    <p class="text-text-muted">Builder Bot is primarily trained on Lua, but it can understand requests made in plain English and most major programming languages.</p>
+                </div>
+                <!-- FAQ Item 3 -->
+                <div class="glass p-5 rounded-xl transition duration-300">
+                    <h3 class="text-lg font-semibold text-text-light mb-2">Is this a subscription or a one-time purchase?</h3>
+                    <p class="text-text-muted">It is a <span class="font-semibold">one-time purchase</span> of $4.99, which grants you a lifetime license and includes the guarantee of 4+ years of future updates and support.</p>
+                </div>
+                <!-- FAQ Item 4 -->
+                <div class="glass p-5 rounded-xl transition duration-300">
+                    <h3 class="text-lg font-semibold text-text-light mb-2">What if I need help or have a bug?</h3>
+                    <p class="text-text-muted">We offer dedicated support! Join our Discord community (link above) where developers and staff can help you instantly.</p>
+                </div>
+                <!-- FAQ Item 5 (New) -->
+                <div class="glass p-5 rounded-xl transition duration-300 border-l-4 border-success-green">
+                    <h3 class="text-lg font-semibold text-text-light mb-2">What is your refund policy?</h3>
+                    <p class="text-text-muted">We offer a **30-day money-back guarantee**. If Builder Bot doesn't meet your expectations within the first month, contact us via Discord for a full refund, no questions asked.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-16 md:py-20 max-w-3xl mx-auto px-4 text-center bg-secondary-bg">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Get the Builder Bot Advantage Today</h2>
+        <p class="text-xl text-text-muted mb-12">An incredible value: one payment, years of use.</p>
+
+        <!-- Pricing Card -->
+        <div class="glass p-8 rounded-2xl border-4 border-primary-accent/50 w-full">
+            <p class="text-sm font-semibold uppercase text-primary-accent mb-2">LIFETIME DEVELOPER LICENSE</p>
+            <div class="flex items-end justify-center mb-6">
+                <span class="text-5xl font-extrabold text-text-light">$4</span>
+                <span class="text-2xl font-bold text-text-light">.99</span>
+                <span class="text-xl text-text-muted ml-2">/ one-time</span>
+            </div>
+            <p class="text-text-muted mb-8">Includes all current features, unlimited use, and prioritized support.</p>
+
+            <ul class="text-left space-y-3 text-text-light mb-10">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Unlimited AI Code & Debugging
+                </li>
+                <li class="flex items-center font-bold text-primary-accent">
+                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    4+ Years of Guaranteed Feature Updates
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Direct Access to Developer Community
+                </li>
+            </ul>
+
+            <!-- Direct link to purchase page -->
+            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button w-full bg-primary-accent text-text-light text-xl font-bold py-4 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
+                Buy Builder Bot on Roblox Creator Store
+            </a>
+            <p class="text-text-muted text-sm mt-3">
+                Purchase is secure and processed through the Roblox platform.
+            </p>
+            <p class="text-sm font-semibold text-success-green mt-2">
+                30-Day Money-Back Guarantee.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm text-text-muted">&copy; 2025 Builder Bot Developers. The Builder Bot plugin is an independent developer tool and is not officially affiliated with Roblox Corporation.</p>
+            <div class="flex justify-center space-x-6 mt-4 text-text-muted text-sm">
+                <a href="https://discord.gg/yydzPUDMBXccent">Support</a>
+                <a href="terms.html"hover:text-primary-accent>Terms of Service</a>
+                <a href="privacy.html"hover:text-primary-accent">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
