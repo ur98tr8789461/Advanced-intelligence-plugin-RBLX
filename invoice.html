@@ -87,8 +87,9 @@
 
         // --- Defensive Firebase Configuration Setup ---
 
+        // This safe config is used if environment variables fail, guaranteeing the required fields exist.
         const SAFE_CONFIG = {
-            apiKey: "placeholder",
+            apiKey: "placeholder", 
             authDomain: "placeholder.firebaseapp.com",
             projectId: "placeholder-project-id", // GUARANTEED to be present
             storageBucket: "placeholder.appspot.com",
@@ -290,7 +291,10 @@
                 }
             } catch (error) {
                 console.error("Firebase initialization or auth error:", error);
-                showModal('Error', `Initialization failed: ${error.message}. Check console for details.`);
+                // Display clearer error message advising a refresh
+                showModal('Initialization Failed', 
+                    `Error: ${error.message}. This usually means the environment variables failed to load. Please try refreshing the entire page to reset the connection.`
+                );
             }
         };
 
@@ -453,7 +457,7 @@
                                     <tr>
                                         <th class="py-2">Description</th>
                                         <th class="py-2 text-right">Qty</th>
-                                        <th class="py-2 text-right">Unit Price</th>
+                                        <th scope="col" class="px-6 py-3">Unit Price</th>
                                         <th class="py-2 text-right">Total</th>
                                     </tr>
                                 </thead>
