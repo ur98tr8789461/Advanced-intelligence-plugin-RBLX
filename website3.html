@@ -1,844 +1,173 @@
-<script type="module">
-        
-    // --- LOCAL STORAGE IMPLEMENTATION ---
-    
-    const STORAGE_KEY = 'invoicify_local_data';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Editor</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+  h2 { margin-bottom: 20px; }
+  .invoice-field { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 400px; }
+  .invoice-table { border-collapse: collapse; width: 100%; max-width: 600px; margin-top: 20px; }
+  .invoice-table th, .invoice-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  .invoice-table th { background-color: #eee; }
+  #preview { border: 1px solid #ccc; padding: 10px; margin-top: 20px; background: #fff; max-width: 600px; }
+  .add-item { margin-top: 10px; padding: 5px 10px; cursor: pointer; }
+</style>
+</head>
+<body>
 
-    /** Loads all app data (settings, clients, invoices) from local storage. */
-    const loadFromLocalStorage = () => {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : { settings: null, clients: [], invoices: [] };
-        } catch (e) {
-            console.error("Error loading from local storage (data might be corrupt, resetting to default):", e);
-            // Return default state on error to prevent load failure
-            return { settings: null, clients: [], invoices: [] };
-        }
+<h2>Invoice Editor</h2>
+
+<label>Invoice Title:</label>
+<input id="invoiceTitle" class="invoice-field" placeholder="Invoice Title">
+
+<label>Client Name:</label>
+<input id="clientName" class="invoice-field" placeholder="Client Name">
+
+<label>Invoice Items:</label>
+<table id="itemsTable" class="invoice-table">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Total</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="itemsBody">
+    <!-- Items added dynamically -->
+  </tbody>
+</table>
+<button id="addItemBtn" class="add-item">Add Item</button>
+
+<div id="preview">
+  <h3 id="previewTitle">Title: </h3>
+  <p id="previewClient">Client: </p>
+  <h4>Items:</h4>
+  <table id="previewItems" class="invoice-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Preview items -->
+    </tbody>
+  </table>
+  <h4 id="previewTotal">Total: 0</h4>
+</div>
+
+<script>
+  // Debounce helper
+  function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
     };
-
-    /** Saves all app data (settings, clients, invoices) to local storage. */
-    const saveToLocalStorage = () => {
-        try {
-            const dataToSave = {
-                settings: state.settings,
-                clients: state.clients,
-                invoices: state.invoices,
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-        } catch (e) {
-            console.error("Error saving to local storage", e);
-        }
-    };
-
-    const initialData = loadFromLocalStorage();
-
-    // --- Application State ---
-    const state = {
-        currentView: 'DASHBOARD', // Will be overridden immediately by DOMContentLoaded
-        settings: initialData.settings, // Stores user settings and company profile
-        clients: initialData.clients,
-        invoices: initialData.invoices,
-        currentInvoice: null,
-        modal: {
-            isVisible: false,
-            title: '',
-            message: ''
-        }
-    };
-
-    // --- Utility Functions ---
-
-    /** Generates a simple, universally compatible unique ID. */
-    const generateUID = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
-
-
-    /**
-     * Debounce function to prevent repeated function calls (like updateUI) 
-     * on fast-firing events (like keyboard input).
-     */
-    const debounce = (func, delay) => {
-        let timeoutId;
-        return (...args) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                func.apply(null, args);
-            }, delay);
-        };
-    };
-
-    // Application-wide debounced update (300ms delay)
-    const debouncedUpdateUI = debounce(updateUI, 300);
-    
-    /** Generates a random, unique Invoice ID based on the current year. */
-    const generateInvoiceId = (invoices) => {
-        const year = new Date().getFullYear();
-        // Filter out 'NEW_DRAFT' and count existing for the year
-        const count = invoices.filter(inv => inv.invoiceId.startsWith(`INV-${year}`)).length + 1;
-        return `INV-${year}-${String(count).padStart(4, '0')}`;
-    };
-
-    /** Calculates all financial totals for the current invoice. */
-    const calculateTotals = (invoice) => {
-        const items = invoice.items || [];
-        let subtotal = 0;
-        
-        items.forEach(item => {
-            const total = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0);
-            item.lineTotal = parseFloat(total.toFixed(2));
-            subtotal += total;
-        });
-        
-        const taxRate = parseFloat(invoice.totals.taxRate) || 0;
-        const discountAmount = parseFloat(invoice.totals.discountAmount) || 0;
-
-        let taxableBase = subtotal - discountAmount;
-        if (taxableBase < 0) taxableBase = 0;
-
-        const taxAmount = parseFloat((taxableBase * taxRate).toFixed(2));
-        const grandTotal = parseFloat((subtotal - discountAmount + taxAmount).toFixed(2));
-
-        invoice.totals = {
-            ...invoice.totals,
-            subtotal: parseFloat(subtotal.toFixed(2)),
-            taxAmount: taxAmount,
-            grandTotal: grandTotal,
-        };
-    };
-
-    /** Resets and initializes a new invoice object. */
-    const newInvoice = () => {
-        const inv = {
-            invoiceId: 'NEW_DRAFT',
-            docId: generateUID(), // Use generateUID for a unique local ID
-            status: 'Draft',
-            dateIssued: new Date().toISOString().substring(0, 10),
-            // Robust due date calculation (handles time zone offset better)
-            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10), // Net 30 default
-            currency: state.settings?.defaultCurrency || 'USD',
-            paymentTerms: state.settings?.defaultPaymentTerms || 'Net 30',
-            client: {},
-            sender: state.settings?.companyProfile || {},
-            items: [{ itemId: generateUID(), description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00 }], // Use generateUID for item ID
-            totals: {
-                subtotal: 0.00,
-                discountAmount: 0.00,
-                taxRate: state.settings?.defaultTaxRate || 0.00,
-                taxAmount: 0.00,
-                grandTotal: 0.00,
-            },
-            design: {
-                templateStyle: 'Glassmorphism', 
-                themeColor: 'Dark Blue', 
-                mode: 'Dark'
-            },
-            notes: state.settings?.defaultNotes || 'Thank you for your business!',
-            paymentInstructions: state.settings?.paymentDetails || '',
-        };
-        calculateTotals(inv);
-        return inv;
-    };
-
-    /** Shows a custom modal message */
-    const showModal = (title, message) => {
-        state.modal = { isVisible: true, title, message };
-        updateUI();
-    };
-    
-    // --- Local Storage Data Interaction ---
-
-    /** Saves the user's settings (used in Onboarding and Settings page) */
-    const saveSettings = (settingsData) => {
-        state.settings = settingsData;
-        saveToLocalStorage();
-        showModal('Success', 'Settings saved successfully!');
-    };
-
-    /** Saves a single invoice document (used in Editor) */
-    const saveInvoice = async (invoiceData, options = { final: false }) => {
-        try {
-            // If it's a new final invoice, generate the final ID
-            if (options.final && invoiceData.invoiceId === 'NEW_DRAFT') {
-                invoiceData.invoiceId = generateInvoiceId(state.invoices);
-                invoiceData.status = 'Sent'; // Automatically mark as sent when finalizing
-            }
-
-            // docId should always exist now thanks to newInvoice() and generateUID()
-            const existingIndex = state.invoices.findIndex(i => i.docId === invoiceData.docId);
-
-            if (existingIndex > -1) {
-                // Update existing
-                state.invoices[existingIndex] = JSON.parse(JSON.stringify(invoiceData));
-            } else {
-                // Add new
-                state.invoices.push(JSON.parse(JSON.stringify(invoiceData)));
-            }
-            
-            saveToLocalStorage();
-
-            showModal('Success', `Invoice ${invoiceData.invoiceId} saved.`);
-            state.currentInvoice = invoiceData;
-
-            // Move to History view on final save
-            if (options.final) {
-                state.currentView = 'HISTORY';
-            }
-
-            updateUI();
-        } catch (error) {
-            console.error("Error saving invoice:", error);
-            showModal('Error', `Failed to save invoice: ${error.message}`);
-        }
-    };
-
-
-    // --- View Rendering Logic (Remains mostly the same) ---
-
-    const renderNav = () => {
-        const navItems = [
-            { id: 'DASHBOARD', icon: 'fa-house', label: 'Dashboard' },
-            { id: 'HISTORY', icon: 'fa-file-invoice', label: 'Invoices' },
-            // { id: 'CLIENTS', icon: 'fa-user-group', label: 'Clients' }, // Removed for simplicity
-            { id: 'SETTINGS', icon: 'fa-gear', label: 'Settings' }
-        ];
-        
-        // Render the Nav Bar for the main application
-        return `
-            <nav class="glass-card flex justify-between items-center p-4 sticky top-0 z-50 rounded-none rounded-b-xl">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-gem text-lg text-blue-400"></i>
-                    <span class="text-xl font-bold">Invoicify</span>
-                </div>
-                <div class="hidden md:flex space-x-4">
-                    ${navItems.map(item => `
-                        <button onclick="window.changeView('${item.id}')" class="flex items-center space-x-2 p-2 rounded-lg transition ${state.currentView === item.id ? 'bg-blue-800/50 text-white' : 'hover:bg-white/10 text-gray-300'}">
-                            <i class="fa-solid ${item.icon}"></i>
-                            <span>${item.label}</span>
-                        </button>
-                    `).join('')}
-                </div>
-                <button onclick="window.startNewInvoice()" class="btn-primary flex items-center space-x-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span class="hidden sm:inline">Create Invoice</span>
-                </button>
-            </nav>
-        `;
-    };
-
-    const renderOnboarding = () => {
-        // Check for existing values to pre-populate if they exist (for reuse as "Settings")
-        const s = state.settings || { companyProfile: {} };
-        
-        return `
-            <div class="flex flex-col items-center justify-center flex-grow p-4">
-                <div class="glass-card p-8 w-full max-w-lg space-y-6">
-                    <h2 class="text-3xl font-extrabold text-white text-center">${state.currentView === 'SETTINGS' ? 'Application Settings' : 'Welcome Aboard!'}</h2>
-                    <p class="text-center text-gray-300">Let's set up your company profile to start invoicing. (Data saved to Local Storage)</p>
-                    
-                    <form id="onboarding-form" class="space-y-4">
-                        <div>
-                            <label for="companyName" class="block text-sm font-medium text-gray-300">Company Name</label>
-                            <input type="text" id="onboard_companyName" value="${s.companyProfile.companyName || ''}" required placeholder="Doe Designs Inc." class="glass-input w-full mt-1">
-                        </div>
-                        <div>
-                            <label for="logoUrl" class="block text-sm font-medium text-gray-300">Company Logo URL (Placeholder)</label>
-                            <input type="text" id="onboard_logoUrl" value="${s.companyProfile.logoUrl || 'https://placehold.co/150x50/3b82f6/white?text=LOGO'}" placeholder="https://placehold.co/150x50/3b82f6/white?text=LOGO" class="glass-input w-full mt-1">
-                        </div>
-                        <div>
-                            <label for="defaultCurrency" class="block text-sm font-medium text-gray-300">Default Currency</label>
-                            <select id="onboard_defaultCurrency" class="glass-input w-full mt-1">
-                                <option value="USD" ${s.defaultCurrency === 'USD' ? 'selected' : ''}>USD ($)</option>
-                                <option value="EUR" ${s.defaultCurrency === 'EUR' ? 'selected' : ''}>EUR (€)</option>
-                                <option value="GBP" ${s.defaultCurrency === 'GBP' ? 'selected' : ''}>GBP (£)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="paymentDetails" class="block text-sm font-medium text-gray-300">Payment Details (Bank Info, etc.)</label>
-                            <textarea id="onboard_paymentDetails" rows="3" placeholder="Bank Name: XYZ, Account: 123456" class="glass-input w-full mt-1">${s.paymentDetails || ''}</textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn-primary w-full mt-6">Save Settings & Go to Dashboard</button>
-                    </form>
-                </div>
-            </div>
-        `;
-    };
-    
-    const renderInvoicePreview = (invoice) => {
-        const { companyProfile } = state.settings || {};
-        const { design } = invoice;
-
-        let cardClass = 'glass-card border-2';
-        let colorClass = design.themeColor === 'Dark Blue' ? 'bg-blue-950/20 text-gray-200' : 'bg-red-900/20 text-gray-200';
-        
-        // Customize based on templateStyle
-        if (design.templateStyle === 'Glassmorphism') {
-            cardClass = 'glass-card p-8 shadow-xl';
-        } else if (design.templateStyle === 'Modern') {
-            cardClass = 'bg-white/10 p-8 shadow-2xl';
-        } else if (design.templateStyle === 'Sleek') {
-            cardClass = 'bg-gray-900/50 p-6 shadow-lg border-l-4 border-blue-400';
-        }
-
-        return `
-            <div class="h-full overflow-y-auto p-4 md:p-8">
-                <div id="invoice-template-area" class="${cardClass} ${colorClass} mx-auto w-full max-w-3xl min-h-[800px] print:p-0">
-                    <div class="flex justify-between items-start mb-10 border-b border-white/10 pb-4">
-                        <div>
-                            <h1 class="text-4xl font-bold text-white mb-2">INVOICE</h1>
-                            <p class="text-gray-400">#${invoice.invoiceId === 'NEW_DRAFT' ? 'DRAFT - PENDING ID' : invoice.invoiceId}</p>
-                            <p class="text-sm text-gray-500 mt-1">Status: <span class="${invoice.status === 'Sent' ? 'text-blue-400' : invoice.status === 'Draft' ? 'text-yellow-400' : 'text-green-400'} font-semibold">${invoice.status}</span></p>
-                        </div>
-                        <div class="text-right">
-                            ${companyProfile?.logoUrl ? `<img src="${companyProfile.logoUrl}" onerror="this.onerror=null;this.src='https://placehold.co/150x50/3b82f6/white?text=LOGO';" alt="Logo" class="h-10 mb-2 inline-block">` : `<span class="text-xl font-extrabold text-blue-400">${companyProfile?.companyName || 'YOUR COMPANY'}</span>`}
-                            <p class="text-sm text-gray-400">${companyProfile?.companyName || ''}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-10 text-sm">
-                        <div>
-                            <h3 class="font-semibold text-gray-300 uppercase mb-1">Billed To:</h3>
-                            <p class="font-medium">${invoice.client.companyName || 'Select/Enter Client'}</p>
-                            <p class="text-gray-400">${invoice.client.contactPerson || ''}</p>
-                            <p class="text-gray-400">${invoice.client.address?.street || ''}</p>
-                            <p class="text-gray-400">${invoice.client.address?.city || ''}</p>
-                        </div>
-                        <div class="text-right">
-                            <p><span class="font-semibold">Issue Date:</span> ${invoice.dateIssued || 'N/A'}</p>
-                            <p><span class="font-semibold">Due Date:</span> ${invoice.dueDate || 'N/A'}</p>
-                            <p><span class="font-semibold">Payment Terms:</span> ${invoice.paymentTerms}</p>
-                        </div>
-                    </div>
-
-                    <div class="mb-10">
-                        <table class="w-full text-left text-sm">
-                            <thead class="border-b border-white/20 uppercase text-gray-400">
-                                <tr>
-                                    <th class="py-2">Description</th>
-                                    <th class="py-2 text-right">Qty</th>
-                                    <th scope="col" class="px-6 py-3">Unit Price</th>
-                                    <th class="py-2 text-right">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${invoice.items.map(item => `
-                                    <tr class="border-b border-white/5">
-                                        <td class="py-2 font-medium">${item.description || 'Service Description'}</td>
-                                        <td class="py-2 text-right">${item.quantity} ${item.unit}</td>
-                                        <td class="py-2 text-right">${invoice.currency} ${item.unitPrice.toFixed(2)}</td>
-                                        <td class="py-2 text-right font-medium">${invoice.currency} ${item.lineTotal.toFixed(2)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <div class="w-full max-w-sm">
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Subtotal:</span>
-                                    <span class="font-medium">${invoice.currency} ${invoice.totals.subtotal.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Discount:</span>
-                                    <span class="font-medium">${invoice.currency} ${invoice.totals.discountAmount.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Tax (${(invoice.totals.taxRate * 100).toFixed(0)}%):</span>
-                                    <span class="font-medium">${invoice.currency} ${invoice.totals.taxAmount.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between pt-3 border-t border-white/20 text-lg font-bold">
-                                    <span>GRAND TOTAL:</span>
-                                    <span class="text-blue-400">${invoice.currency} ${invoice.totals.grandTotal.toFixed(2)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-10 pt-6 border-t border-white/10 text-sm">
-                        <h3 class="font-semibold text-gray-300 uppercase mb-2">Notes:</h3>
-                        <p class="text-gray-400 mb-4">${invoice.notes}</p>
-                        <h3 class="font-semibold text-gray-300 uppercase mb-2">Payment Instructions:</h3>
-                        <p class="text-gray-400">${invoice.paymentInstructions}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    };
-
-    const renderEditor = () => {
-        const invoice = state.currentInvoice;
-        if (!invoice) return ``;
-
-        // Function to add a new blank line item
-        const addItem = () => {
-            const newItem = {
-                itemId: generateUID(), // Use generateUID
-                description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00
-            };
-            invoice.items.push(newItem);
-            calculateTotals(invoice);
-            updateUI(); // Immediate update on structural change
-        };
-
-        // Function to handle changes to line items
-        const handleItemChange = (itemId, field, value) => {
-            const item = invoice.items.find(i => i.itemId == itemId);
-            if (item) {
-                item[field] = field === 'description' || field === 'unit' ? value : parseFloat(value) || 0;
-                calculateTotals(invoice); // CRITICAL: Calculate totals immediately
-                // CRITICAL FIX: ONLY call debouncedUpdateUI for input changes
-                debouncedUpdateUI(); 
-            }
-        };
-
-        // Function to remove a line item
-        const removeItem = (itemId) => {
-            invoice.items = invoice.items.filter(i => i.itemId != itemId);
-            calculateTotals(invoice);
-            updateUI(); // Immediate update on structural change
-        };
-
-        // Attach listeners for dynamic element manipulation
-        setTimeout(() => {
-            document.getElementById('add-item-btn')?.addEventListener('click', addItem);
-            
-            // Set up event listeners for line items
-            document.querySelectorAll('.line-item-input').forEach(input => {
-                // Remove existing listeners to prevent leaks/doubling
-                input.removeEventListener('input', handleItemChangeWrapper); 
-                input.addEventListener('input', handleItemChangeWrapper);
-            });
-
-            function handleItemChangeWrapper(e) {
-                const [field, itemId] = e.target.id.split('_'); 
-                handleItemChange(itemId, field, e.target.value);
-            }
-
-
-            document.querySelectorAll('.remove-item-btn').forEach(btn => {
-                // Remove and re-add listener for the current rendering cycle
-                btn.removeEventListener('click', removeItemWrapper);
-                btn.addEventListener('click', removeItemWrapper);
-            });
-
-            function removeItemWrapper(e) {
-                const itemId = e.target.dataset.itemid || e.target.closest('button')?.dataset.itemid;
-                if (itemId) removeItem(itemId);
-            }
-
-
-            // Set up listeners for design controls
-            document.getElementById('design-controls')?.addEventListener('click', (e) => {
-                if (e.target.dataset.template) {
-                    invoice.design.templateStyle = e.target.dataset.template;
-                    updateUI();
-                } else if (e.target.dataset.theme) {
-                    invoice.design.themeColor = e.target.dataset.theme;
-                    updateUI();
-                } else if (e.target.dataset.mode) {
-                    invoice.design.mode = e.target.dataset.mode;
-                    updateUI();
-                }
-            });
-
-            // Set up listeners for core data
-            const coreDataForm = document.getElementById('core-data-form');
-            if (coreDataForm) {
-                coreDataForm.removeEventListener('input', handleCoreDataChange);
-                coreDataForm.addEventListener('input', handleCoreDataChange);
-            }
-            
-            function handleCoreDataChange(e) {
-                const field = e.target.id;
-                if (field.startsWith('client_')) {
-                    const clientField = field.substring(7);
-                    if (!invoice.client.address) invoice.client.address = {};
-                    if (clientField === 'street' || clientField === 'city') {
-                        invoice.client.address[clientField] = e.target.value;
-                    } else {
-                        invoice.client[clientField] = e.target.value;
-                    }
-                } else if (field.startsWith('totals_')) {
-                    // Special handling for percentage input (Tax Rate)
-                    if (field === 'totals_taxRate') {
-                        invoice.totals[field.substring(7)] = (parseFloat(e.target.value) / 100) || 0;
-                    } else {
-                        invoice.totals[field.substring(7)] = parseFloat(e.target.value) || 0;
-                    }
-                    calculateTotals(invoice); // CRITICAL: Calculate totals immediately
-                } else {
-                    invoice[field] = e.target.value;
-                }
-                
-                // CRITICAL FIX: ONLY call debouncedUpdateUI for input changes
-                debouncedUpdateUI(); 
-            }
-
-            // Attach Download & Save Handlers
-            document.getElementById('download-pdf-btn')?.addEventListener('click', () => showModal('PDF Generation', 'PDF generation would typically occur server-side or via a library like jsPDF. For now, this is a placeholder.'));
-            document.getElementById('download-image-btn')?.addEventListener('click', generateImage);
-            document.getElementById('save-draft-btn')?.addEventListener('click', () => saveInvoice(invoice, { final: false }));
-            document.getElementById('finalize-send-btn')?.addEventListener('click', () => saveInvoice(invoice, { final: true }));
-
-
-        }, 0); // Run after UI update
-
-        // Line Item Editor Structure
-        const lineItemRows = invoice.items.map(item => `
-            <div class="grid grid-cols-6 gap-3 mb-2 items-center">
-                <input type="text" id="description_${item.itemId}" value="${item.description}" placeholder="Description" class="line-item-input glass-input col-span-2">
-                <input type="text" id="unit_${item.itemId}" value="${item.unit}" placeholder="Unit (e.g., Hrs)" class="line-item-input glass-input">
-                <input type="number" id="quantity_${item.itemId}" value="${item.quantity}" min="0" class="line-item-input glass-input">
-                <input type="number" id="unitPrice_${item.itemId}" value="${item.unitPrice}" min="0" step="0.01" class="line-item-input glass-input">
-                <div class="text-right font-medium">${invoice.currency} ${item.lineTotal.toFixed(2)}</div>
-                <button type="button" data-itemid="${item.itemId}" class="remove-item-btn text-red-400 hover:text-red-500 transition"><i data-itemid="${item.itemId}" class="fa-solid fa-trash-can"></i></button>
-            </div>
-        `).join('');
-
-
-        // Editor UI Layout (Switches from side-by-side on desktop to stacked on mobile)
-        return `
-            <div class="flex flex-col md:flex-row flex-grow"> 
-                <div class="w-full md:w-1/2 overflow-y-auto p-4 md:p-8 space-y-8">
-                    
-                    <div id="design-controls" class="glass-card p-4 space-y-4">
-                        <h3 class="text-xl font-semibold border-b border-white/10 pb-2 mb-4">Design & Theme</h3>
-                        
-                        <p class="font-medium text-gray-300">Style:</p>
-                        <div class="flex space-x-2">
-                            ${['Glassmorphism', 'Modern', 'Sleek'].map(t => `
-                                <button data-template="${t}" class="p-2 rounded-lg text-sm transition ${invoice.design.templateStyle === t ? 'bg-blue-600' : 'bg-white/10 hover:bg-white/20'}">${t}</button>
-                            `).join('')}
-                        </div>
-
-                        <p class="font-medium text-gray-300 pt-3">Theme Color:</p>
-                        <div class="flex space-x-3">
-                            <button data-theme="Dark Blue" class="w-8 h-8 rounded-full bg-blue-900 border-2 ${invoice.design.themeColor === 'Dark Blue' ? 'border-blue-400' : 'border-transparent'} transition"></button>
-                            <button data-theme="Red" class="w-8 h-8 rounded-full bg-red-900 border-2 ${invoice.design.themeColor === 'Red' ? 'border-red-400' : 'border-transparent'} transition"></button>
-                        </div>
-                    </div>
-
-                    <form id="core-data-form" class="space-y-6">
-                        
-                        <div class="glass-card p-4 space-y-4">
-                            <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Client Details</h3>
-                            <input type="text" id="client_companyName" value="${invoice.client.companyName || ''}" placeholder="Client Company Name" class="glass-input w-full">
-                            <input type="text" id="client_contactPerson" value="${invoice.client.contactPerson || ''}" placeholder="Contact Person" class="glass-input w-full">
-                            <input type="date" id="dateIssued" value="${invoice.dateIssued}" class="glass-input w-full">
-                            <input type="date" id="dueDate" value="${invoice.dueDate}" class="glass-input w-full">
-                        </div>
-
-                        <div class="glass-card p-4 space-y-4">
-                            <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Work Items</h3>
-                            <div class="grid grid-cols-6 gap-3 mb-2 font-semibold text-sm text-gray-400">
-                                <div class="col-span-2">Description</div>
-                                <div>Unit</div>
-                                <div>Qty</div>
-                                <div>Price</div>
-                                <div class="text-right">Total</div>
-                                <div></div>
-                            </div>
-                            ${lineItemRows}
-                            <button type="button" id="add-item-btn" class="flex items-center space-x-1 text-blue-400 hover:text-blue-500 transition">
-                                <i class="fa-solid fa-circle-plus"></i> <span>Add Work Item</span>
-                            </button>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="glass-card p-4 space-y-2">
-                                <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Financials</h3>
-                                <label class="block text-sm font-medium">Discount Amount (${invoice.currency})</label>
-                                <input type="number" id="totals_discountAmount" value="${invoice.totals.discountAmount}" step="0.01" min="0" class="glass-input w-full">
-                                <label class="block text-sm font-medium">Tax Rate (%)</label>
-                                <input type="number" id="totals_taxRate" value="${(invoice.totals.taxRate * 100).toFixed(0)}" min="0" max="100" class="glass-input w-full">
-                                <div class="pt-2 border-t border-white/10 text-lg font-bold">
-                                    Grand Total: ${invoice.currency} ${invoice.totals.grandTotal.toFixed(2)}
-                                </div>
-                            </div>
-                            <div class="glass-card p-4 space-y-2">
-                                <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Notes & Instructions</h3>
-                                <textarea id="notes" rows="2" placeholder="Notes (e.g., Thank you)" class="glass-input w-full">${invoice.notes}</textarea>
-                                <textarea id="paymentInstructions" rows="3" placeholder="Payment Instructions" class="glass-input w-full">${invoice.paymentInstructions}</textarea>
-                            </div>
-                        </div>
-
-                    </form>
-                    
-                </div>
-
-                <div class="w-full md:w-1/2 flex-col bg-gray-900/50 border-t md:border-t-0 md:border-l border-white/10 h-[50vh] md:h-auto"> 
-                    <div class="flex justify-end space-x-3 p-4 bg-gray-900/80 sticky top-0 z-10">
-                        <button id="save-draft-btn" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Draft</button>
-                        
-                        <div class="relative group">
-                            <button class="btn-primary p-2 flex items-center space-x-2">
-                                <i class="fa-solid fa-download"></i>
-                                <span>Download Options</span>
-                            </button>
-                            <div class="absolute right-0 mt-2 w-48 rounded-lg shadow-xl bg-gray-800/90 glass-card p-1 hidden group-hover:block z-20">
-                                <button id="download-pdf-btn" class="w-full text-left p-2 rounded-lg hover:bg-blue-600/50 transition">Download as PDF</button>
-                                <button id="download-image-btn" class="w-full text-left p-2 rounded-lg hover:bg-blue-600/50 transition">Download as Image (PNG)</button>
-                            </div>
-                        </div>
-
-                        <button id="finalize-send-btn" class="btn-primary p-2 flex items-center space-x-2 bg-green-600 hover:bg-green-700">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span>Finalize & Send</span>
-                        </button>
-                    </div>
-                    <div id="invoice-preview" class="flex-grow h-full overflow-y-auto"> 
-                        ${renderInvoicePreview(invoice)}
-                    </div>
-                </div>
-            </div>
-        `;
-    };
-
-    const renderDashboard = () => {
-        if (!state.settings) return `<div class="p-8 text-center text-red-400">Settings not loaded. Please complete onboarding.</div>`;
-        
-        const totalInvoices = state.invoices.length;
-        const paidInvoices = state.invoices.filter(i => i.status === 'Paid').length;
-        const outstandingInvoices = state.invoices.filter(i => i.status !== 'Paid' && i.status !== 'Draft').length;
-
-        return `
-            <div class="p-4 md:p-8 space-y-8">
-                <h2 class="text-3xl font-bold">Welcome back, ${state.settings.companyProfile.companyName}!</h2>
-                <p class="text-gray-400 italic">Storage: Local Browser Storage Only</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-card p-6 text-center">
-                        <i class="fa-solid fa-chart-line text-4xl text-blue-400 mb-3"></i>
-                        <p class="text-2xl font-extrabold">${totalInvoices}</p>
-                        <p class="text-gray-400">Total Invoices</p>
-                    </div>
-                    <div class="glass-card p-6 text-center">
-                        <i class="fa-solid fa-circle-check text-4xl text-green-400 mb-3"></i>
-                        <p class="text-2xl font-extrabold">${paidInvoices}</p>
-                        <p class="text-gray-400">Paid Invoices</p>
-                    </div>
-                    <div class="glass-card p-6 text-center">
-                        <i class="fa-solid fa-clock-rotate-left text-4xl text-yellow-400 mb-3"></i>
-                        <p class="text-2xl font-extrabold">${outstandingInvoices}</p>
-                        <p class="text-gray-400">Outstanding</p>
-                    </div>
-                </div>
-                
-                <div class="glass-card p-6">
-                    <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
-                    <div class="flex flex-wrap gap-4">
-                        <button onclick="window.startNewInvoice()" class="btn-primary"><i class="fa-solid fa-plus mr-2"></i> Create New Invoice</button>
-                        <button onclick="window.changeView('HISTORY')" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-file-invoice mr-2"></i> View History</button>
-                    </div>
-                </div>
-
-            </div>
-        `;
-    };
-    
-    const renderHistory = () => {
-         return `
-            <div class="p-4 md:p-8 space-y-8">
-                <h2 class="text-3xl font-bold">Invoice History (${state.invoices.length})</h2>
-                <div class="glass-card p-4 overflow-x-auto">
-                    <table class="min-w-full text-sm text-left text-gray-400">
-                        <thead class="text-xs uppercase bg-white/10">
-                            <tr>
-                                <th scope="col" class="px-6 py-3">#</th>
-                                <th scope="col" class="px-6 py-3">Client</th>
-                                <th scope="col" class="px-6 py-3">Issue Date</th>
-                                <th scope="col" class="px-6 py-3">Due Date</th>
-                                <th scope="col" class="px-6 py-3">Total</th>
-                                <th scope="col" class="px-6 py-3">Status</th>
-                                <th scope="col" class="px-6 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${state.invoices.map(inv => `
-                                <tr class="border-b border-white/5 hover:bg-white/5">
-                                    <td class="px-6 py-4 font-medium text-white">${inv.invoiceId}</td>
-                                    <td class="px-6 py-4">${inv.client.companyName || 'N/A'}</td>
-                                    <td class="px-6 py-4">${inv.dateIssued}</td>
-                                    <td class="px-6 py-4">${inv.dueDate}</td>
-                                    <td class="px-6 py-4 font-semibold">${inv.currency} ${inv.totals.grandTotal.toFixed(2)}</td>
-                                    <td class="px-6 py-4">
-                                        <span class="p-1 rounded-full text-xs font-semibold ${inv.status === 'Paid' ? 'bg-green-600' : inv.status === 'Overdue' ? 'bg-red-600' : 'bg-blue-600'} text-white">${inv.status}</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <button onclick="window.editInvoice('${inv.docId}')" class="text-blue-400 hover:text-blue-500 mr-2"><i class="fa-solid fa-pen"></i></button>
-                                        <button onclick="window.showModal('Action', 'Payment recorded for ${inv.invoiceId}')" class="text-green-400 hover:text-green-500"><i class="fa-solid fa-money-bill-transfer"></i></button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-    }
-
-    const renderModal = () => {
-        if (!state.modal.isVisible) return '';
-        return `
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center">
-                <div class="glass-card p-6 w-full max-w-sm">
-                    <h3 class="text-xl font-bold mb-3">${state.modal.title}</h3>
-                    <p class="text-gray-300 mb-5">${state.modal.message}</p>
-                    <button onclick="window.closeModal()" class="btn-primary w-full">Close</button>
-                </div>
-            </div>
-        `;
-    };
-    
-    // --- Core Application Logic ---
-
-    // Attaching core functions to window for onclick handlers in HTML
-    window.changeView = (view) => {
-        state.currentView = view;
-        updateUI();
-    };
-
-    window.startNewInvoice = () => {
-        state.currentInvoice = newInvoice();
-        window.changeView('EDITOR');
-    };
-
-    window.editInvoice = (docId) => {
-        const invoiceToEdit = state.invoices.find(i => i.docId === docId);
-        if (invoiceToEdit) {
-            state.currentInvoice = JSON.parse(JSON.stringify(invoiceToEdit)); // Deep copy for editing
-            calculateTotals(state.currentInvoice);
-            window.changeView('EDITOR');
-        } else {
-            window.showModal('Error', 'Invoice not found.');
-        }
-    };
-
-    window.showModal = showModal;
-
-    window.closeModal = () => {
-        state.modal.isVisible = false;
-        updateUI();
-    };
-
-    const generateImage = () => {
-        const previewElement = document.getElementById('invoice-template-area');
-        if (!previewElement) {
-            return window.showModal('Error', 'Invoice preview element not found.');
-        }
-        
-        window.showModal('Generating Image...', 'Please wait while we capture the invoice as a high-quality PNG.');
-
-        // Use html2canvas to capture the rendered invoice area
-        html2canvas(previewElement, {
-            scale: 2, // Higher resolution
-            useCORS: true, // Handle images/logos if from another domain
-            backgroundColor: null, // Transparent background if possible
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = `${state.currentInvoice.invoiceId || 'draft'}-invoice.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.closeModal(); // Close the "Generating" modal
-            window.showModal('Success', 'Invoice image downloaded successfully!');
-        }).catch(error => {
-            console.error('Error generating image:', error);
-            window.showModal('Error', 'Failed to generate image. See console for details.');
-        });
-    };
-
-    const updateUI = () => {
-        const appDiv = document.getElementById('app');
-        if (!appDiv) {
-            console.error("Critical Error: #app element not found.");
-            return;
-        }
-        
-        let content = '';
-        
-        // Only render full application views (Nav + Content)
-        if (['DASHBOARD', 'EDITOR', 'HISTORY', 'SETTINGS'].includes(state.currentView)) {
-            content += renderNav();
-            content += '<main class="flex-grow">';
-            if (state.currentView === 'DASHBOARD') {
-                content += renderDashboard();
-            } else if (state.currentView === 'EDITOR') {
-                content += renderEditor();
-            } else if (state.currentView === 'HISTORY') {
-                content += renderHistory();
-            } else if (state.currentView === 'SETTINGS') {
-                 // The settings view now uses the same form as onboarding
-                content += renderOnboarding();
-            }
-            content += '</main>';
-        } else if (state.currentView === 'ONBOARDING') {
-            content = renderOnboarding();
-        } else {
-            // Fallback for an unknown view state (Should not happen if initialization is successful)
-            content = `<div class="flex flex-col items-center justify-center flex-grow p-8 text-red-400">
-                <i class="fa-solid fa-triangle-exclamation text-4xl mb-4"></i>
-                <p>Unknown view state: ${state.currentView}. Please refresh.</p>
-            </div>`;
-        }
-
-
-        appDiv.innerHTML = content + renderModal();
-
-        // Setup Onboarding/Settings Form Listener after rendering
-        if (state.currentView === 'ONBOARDING' || state.currentView === 'SETTINGS') {
-            document.getElementById('onboarding-form')?.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const companyName = document.getElementById('onboard_companyName').value;
-                const logoUrl = document.getElementById('onboard_logoUrl').value;
-                const defaultCurrency = document.getElementById('onboard_defaultCurrency').value;
-                const paymentDetails = document.getElementById('onboard_paymentDetails').value;
-
-                const settingsData = {
-                    companyProfile: { companyName, logoUrl, taxId: 'N/A' },
-                    defaultCurrency,
-                    defaultPaymentTerms: 'Net 30',
-                    defaultTaxRate: state.settings?.defaultTaxRate || 0.00, // Preserve previous tax rate if it exists
-                    defaultNotes: state.settings?.defaultNotes || 'Thank you for your business!', // Preserve previous notes
-                    paymentDetails
-                };
-                saveSettings(settingsData);
-                state.currentView = 'DASHBOARD'; // Move to dashboard upon success
-                updateUI();
-            });
-        }
-    };
-
-    // --- Initialization on DOM Content Load (CRITICAL FIX) ---
-    document.addEventListener('DOMContentLoaded', () => {
-        try {
-            // Determine initial view: if settings are incomplete, go to ONBOARDING. Otherwise, DASHBOARD.
-            const needsOnboarding = !state.settings || !state.settings.companyProfile || !state.settings.companyProfile.companyName;
-
-            if (needsOnboarding) {
-                state.currentView = 'ONBOARDING';
-                console.log("App Init: Starting Onboarding.");
-            } else {
-                state.currentView = 'DASHBOARD';
-                console.log("App Init: Starting Dashboard.");
-            }
-            
-            // Immediately call updateUI to overwrite the initial loading content
-            updateUI();
-        } catch (error) {
-            console.error("FATAL APP INITIALIZATION ERROR:", error);
-            const appDiv = document.getElementById('app');
-            if (appDiv) {
-                // Display a human-readable error if the script crashes during init
-                appDiv.innerHTML = `<div class="p-8 text-center text-red-500">
-                    <h2 class="text-2xl font-bold">App Startup Failed!</h2>
-                    <p class="mt-2">A critical error occurred while starting the application. Please check the browser console for specific details (F12 or Cmd+Option+J).</p>
-                </div>`;
-            }
-        }
+  }
+
+  const invoiceTitle = document.getElementById('invoiceTitle');
+  const clientName = document.getElementById('clientName');
+  const itemsBody = document.getElementById('itemsBody');
+  const addItemBtn = document.getElementById('addItemBtn');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewClient = document.getElementById('previewClient');
+  const previewItems = document.querySelector('#previewItems tbody');
+  const previewTotal = document.getElementById('previewTotal');
+
+  let items = JSON.parse(localStorage.getItem('invoiceItems')) || [];
+
+  function updatePreview() {
+    previewTitle.textContent = `Title: ${invoiceTitle.value}`;
+    previewClient.textContent = `Client: ${clientName.value}`;
+
+    // Clear preview items
+    previewItems.innerHTML = '';
+    let total = 0;
+    items.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${item.price}</td>
+        <td>${(item.qty * item.price).toFixed(2)}</td>
+      `;
+      previewItems.appendChild(tr);
+      total += item.qty * item.price;
     });
+    previewTotal.textContent = `Total: ${total.toFixed(2)}`;
+  }
 
+  function saveItems() {
+    localStorage.setItem('invoiceItems', JSON.stringify(items));
+  }
+
+  function renderItems() {
+    itemsBody.innerHTML = '';
+    items.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" value="${item.name}" data-index="${index}" class="itemName"></td>
+        <td><input type="number" value="${item.qty}" data-index="${index}" class="itemQty" min="0"></td>
+        <td><input type="number" value="${item.price}" data-index="${index}" class="itemPrice" min="0" step="0.01"></td>
+        <td>${(item.qty * item.price).toFixed(2)}</td>
+        <td><button data-index="${index}" class="deleteItem">Delete</button></td>
+      `;
+      itemsBody.appendChild(tr);
+    });
+    updatePreview();
+  }
+
+  // Event delegation for item changes
+  itemsBody.addEventListener('input', debounce(function(e) {
+    const target = e.target;
+    const index = target.dataset.index;
+    if (target.classList.contains('itemName')) items[index].name = target.value;
+    if (target.classList.contains('itemQty')) items[index].qty = parseFloat(target.value) || 0;
+    if (target.classList.contains('itemPrice')) items[index].price = parseFloat(target.value) || 0;
+    saveItems();
+    renderItems();
+  }, 200));
+
+  // Delete item
+  itemsBody.addEventListener('click', function(e) {
+    if (e.target.classList.contains('deleteItem')) {
+      const index = e.target.dataset.index;
+      items.splice(index, 1);
+      saveItems();
+      renderItems();
+    }
+  });
+
+  // Add new item
+  addItemBtn.addEventListener('click', () => {
+    items.push({name:'', qty:0, price:0});
+    saveItems();
+    renderItems();
+  });
+
+  // Save title & client
+  invoiceTitle.addEventListener('input', debounce(() => {
+    localStorage.setItem('invoiceTitle', invoiceTitle.value);
+    updatePreview();
+  }, 300));
+
+  clientName.addEventListener('input', debounce(() => {
+    localStorage.setItem('clientName', clientName.value);
+    updatePreview();
+  }, 300));
+
+  // Load saved title & client
+  invoiceTitle.value = localStorage.getItem('invoiceTitle') || '';
+  clientName.value = localStorage.getItem('clientName') || '';
+  renderItems();
 </script>
+
+</body>
+</html>
