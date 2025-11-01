@@ -84,31 +84,44 @@
 
         // Global Firebase and App Variables (MUST be present for Canvas environment)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // Define a safe default config in case the environment variable is not set
-        const safeDefaultConfig = {
+
+        // --- Defensive Firebase Configuration Setup ---
+
+        const SAFE_CONFIG = {
             apiKey: "placeholder",
             authDomain: "placeholder.firebaseapp.com",
-            projectId: "placeholder-project-id", // The required field for the fix
+            projectId: "placeholder-project-id", // GUARANTEED to be present
             storageBucket: "placeholder.appspot.com",
             messagingSenderId: "1234567890",
             appId: "1:1234567890:web:abcdef1234567890"
         };
         
-        let firebaseConfig = safeDefaultConfig;
-        try {
-             // Try to parse the real config from the global variable
-            const configString = typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : null;
-            if (configString) {
-                const parsedConfig = JSON.parse(configString);
-                // Merge the parsed config over the safe default to ensure required fields exist
-                firebaseConfig = { ...safeDefaultConfig, ...parsedConfig };
+        /**
+         * Safely retrieves the Firebase configuration, using environment variables
+         * if available and valid, otherwise falling back to the SAFE_CONFIG.
+         */
+        const getFirebaseConfig = () => {
+            try {
+                const configString = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+                
+                // Check if string exists and looks like valid JSON object start
+                if (configString && configString.trim().startsWith('{')) {
+                    const parsedConfig = JSON.parse(configString);
+                    // Merge environment config with SAFE_CONFIG to ensure ALL keys are present
+                    return { ...SAFE_CONFIG, ...parsedConfig };
+                }
+            } catch (e) {
+                console.warn("Could not parse __firebase_config, falling back to safe default.", e);
             }
-        } catch (e) {
-            console.error("Error parsing __firebase_config. Using safe default.", e);
-        }
-        
+            console.log("Using SAFE_CONFIG for Firebase initialization.");
+            return SAFE_CONFIG;
+        };
+
+        const firebaseConfig = getFirebaseConfig();
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- End of Defensive Firebase Configuration Setup ---
+
 
         let app;
         let db;
@@ -539,7 +552,9 @@
 
                 document.querySelectorAll('.remove-item-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        removeItem(e.target.dataset.itemid);
+                        // Use dataset to get the itemid reliably
+                        const itemId = e.target.dataset.itemid || e.target.closest('button')?.dataset.itemid;
+                        if (itemId) removeItem(itemId);
                     });
                 });
 
@@ -570,7 +585,12 @@
                             invoice.client[clientField] = e.target.value;
                         }
                     } else if (field.startsWith('totals_')) {
-                        invoice.totals[field.substring(7)] = parseFloat(e.target.value) || 0;
+                        // Special handling for percentage input (Tax Rate)
+                        if (field === 'totals_taxRate') {
+                            invoice.totals[field.substring(7)] = (parseFloat(e.target.value) / 100) || 0;
+                        } else {
+                            invoice.totals[field.substring(7)] = parseFloat(e.target.value) || 0;
+                        }
                         calculateTotals(invoice);
                     } else {
                         invoice[field] = e.target.value;
@@ -595,7 +615,7 @@
                     <input type="number" id="quantity_${item.itemId}" value="${item.quantity}" min="0" class="line-item-input glass-input">
                     <input type="number" id="unitPrice_${item.itemId}" value="${item.unitPrice}" min="0" step="0.01" class="line-item-input glass-input">
                     <div class="text-right font-medium">${invoice.currency} ${item.lineTotal.toFixed(2)}</div>
-                    <button data-itemid="${item.itemId}" class="remove-item-btn text-red-400 hover:text-red-500 transition"><i data-itemid="${item.itemId}" class="fa-solid fa-trash-can"></i></button>
+                    <button type="button" data-itemid="${item.itemId}" class="remove-item-btn text-red-400 hover:text-red-500 transition"><i data-itemid="${item.itemId}" class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join('');
 
@@ -659,7 +679,7 @@
                                     <label class="block text-sm font-medium">Discount Amount (${invoice.currency})</label>
                                     <input type="number" id="totals_discountAmount" value="${invoice.totals.discountAmount}" step="0.01" min="0" class="glass-input w-full">
                                     <label class="block text-sm font-medium">Tax Rate (%)</label>
-                                    <input type="number" id="totals_taxRate" value="${(invoice.totals.taxRate * 100).toFixed(0)}" min="0" max="100" class="glass-input w-full" oninput="this.value = parseFloat(this.value)/100;">
+                                    <input type="number" id="totals_taxRate" value="${(invoice.totals.taxRate * 100).toFixed(0)}" min="0" max="100" class="glass-input w-full">
                                     <div class="pt-2 border-t border-white/10 text-lg font-bold">
                                         Grand Total: ${invoice.currency} ${invoice.totals.grandTotal.toFixed(2)}
                                     </div>
