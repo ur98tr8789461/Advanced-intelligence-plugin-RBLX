@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sleek Glassmorphic Invoicing</title>
+    <title>Sleek Glassmorphic Invoicing (Local Storage)</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
@@ -76,66 +76,44 @@
         <!-- Content will be rendered here by JavaScript -->
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, updateDoc, where, getDocs, writeBatch, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Firebase and App Variables (MUST be present for Canvas environment)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // --- Defensive Firebase Configuration Setup ---
-
-        // This safe config is used if environment variables fail, guaranteeing the required fields exist.
-        const SAFE_CONFIG = {
-            apiKey: "placeholder", 
-            authDomain: "placeholder.firebaseapp.com",
-            projectId: "placeholder-project-id", // GUARANTEED to be present
-            storageBucket: "placeholder.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef1234567890"
-        };
+        // --- LOCAL STORAGE IMPLEMENTATION ---
         
-        /**
-         * Safely retrieves the Firebase configuration, using environment variables
-         * if available and valid, otherwise falling back to the SAFE_CONFIG.
-         */
-        const getFirebaseConfig = () => {
+        const STORAGE_KEY = 'invoicify_local_data';
+
+        /** Loads all app data (settings, clients, invoices) from local storage. */
+        const loadFromLocalStorage = () => {
             try {
-                const configString = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-                
-                // Check if string exists and looks like valid JSON object start
-                if (configString && configString.trim().startsWith('{')) {
-                    const parsedConfig = JSON.parse(configString);
-                    // Merge environment config with SAFE_CONFIG to ensure ALL keys are present
-                    return { ...SAFE_CONFIG, ...parsedConfig };
-                }
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : { settings: null, clients: [], invoices: [] };
             } catch (e) {
-                console.warn("Could not parse __firebase_config, falling back to safe default.", e);
+                console.error("Error loading from local storage", e);
+                return { settings: null, clients: [], invoices: [] };
             }
-            console.log("Using SAFE_CONFIG for Firebase initialization.");
-            return SAFE_CONFIG;
         };
 
-        const firebaseConfig = getFirebaseConfig();
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        /** Saves all app data (settings, clients, invoices) to local storage. */
+        const saveToLocalStorage = () => {
+            try {
+                const dataToSave = {
+                    settings: state.settings,
+                    clients: state.clients,
+                    invoices: state.invoices,
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            } catch (e) {
+                console.error("Error saving to local storage", e);
+            }
+        };
 
-        // --- End of Defensive Firebase Configuration Setup ---
-
-
-        let app;
-        let db;
-        let auth;
-        let userId = null;
-        let isAuthReady = false;
+        const initialData = loadFromLocalStorage();
 
         // --- Application State ---
         const state = {
             currentView: 'LOADING', // LOADING, ONBOARDING, EDITOR, DASHBOARD, HISTORY
-            settings: null, // Stores user settings and company profile
-            clients: [],
-            invoices: [],
+            settings: initialData.settings, // Stores user settings and company profile
+            clients: initialData.clients,
+            invoices: initialData.invoices,
             currentInvoice: null,
             modal: {
                 isVisible: false,
@@ -149,6 +127,7 @@
         /** Generates a random, unique Invoice ID based on the current year. */
         const generateInvoiceId = (invoices) => {
             const year = new Date().getFullYear();
+            // Filter out 'NEW_DRAFT' and count existing for the year
             const count = invoices.filter(inv => inv.invoiceId.startsWith(`INV-${year}`)).length + 1;
             return `INV-${year}-${String(count).padStart(4, '0')}`;
         };
@@ -185,6 +164,7 @@
         const newInvoice = () => {
             const inv = {
                 invoiceId: 'NEW_DRAFT',
+                docId: null, // Used for local editing reference
                 status: 'Draft',
                 dateIssued: new Date().toISOString().substring(0, 10),
                 dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10), // Net 30 default
@@ -192,7 +172,7 @@
                 paymentTerms: state.settings?.defaultPaymentTerms || 'Net 30',
                 client: {},
                 sender: state.settings?.companyProfile || {},
-                items: [{ itemId: 1, description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00 }],
+                items: [{ itemId: Date.now(), description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00 }],
                 totals: {
                     subtotal: 0.00,
                     discountAmount: 0.00,
@@ -217,29 +197,18 @@
             state.modal = { isVisible: true, title, message };
             updateUI();
         };
-
-        // --- Firebase Data Interaction ---
         
-        const getSettingsDocRef = () => doc(db, 'artifacts', appId, 'users', userId, 'settings', 'profile');
-        const getInvoicesCollectionRef = () => collection(db, 'artifacts', appId, 'users', userId, 'invoices');
+        // --- Local Storage Data Interaction ---
 
         /** Saves the user's settings (used in Onboarding and Settings page) */
-        const saveSettings = async (settingsData) => {
-            if (!userId) return showModal('Error', 'User not authenticated. Cannot save settings.');
-            try {
-                await setDoc(getSettingsDocRef(), settingsData, { merge: true });
-                state.settings = settingsData;
-                showModal('Success', 'Settings saved successfully!');
-            } catch (error) {
-                console.error("Error saving settings:", error);
-                showModal('Error', `Failed to save settings: ${error.message}`);
-            }
+        const saveSettings = (settingsData) => {
+            state.settings = settingsData;
+            saveToLocalStorage();
+            showModal('Success', 'Settings saved successfully!');
         };
 
         /** Saves a single invoice document (used in Editor) */
         const saveInvoice = async (invoiceData, options = { final: false }) => {
-            if (!userId) return showModal('Error', 'User not authenticated. Cannot save invoice.');
-            
             try {
                 // If it's a new final invoice, generate the final ID
                 if (options.final && invoiceData.invoiceId === 'NEW_DRAFT') {
@@ -247,14 +216,23 @@
                     invoiceData.status = 'Sent'; // Automatically mark as sent when finalizing
                 }
 
-                if (invoiceData.docId) {
-                    const docRef = doc(getInvoicesCollectionRef(), invoiceData.docId);
-                    await updateDoc(docRef, invoiceData);
+                // Assign a unique local ID if it's a new draft
+                if (!invoiceData.docId) {
+                    invoiceData.docId = crypto.randomUUID();
+                }
+
+                const existingIndex = state.invoices.findIndex(i => i.docId === invoiceData.docId);
+
+                if (existingIndex > -1) {
+                    // Update existing
+                    state.invoices[existingIndex] = JSON.parse(JSON.stringify(invoiceData));
                 } else {
-                    const docRef = await addDoc(getInvoicesCollectionRef(), invoiceData);
-                    invoiceData.docId = docRef.id;
+                    // Add new
+                    state.invoices.push(JSON.parse(JSON.stringify(invoiceData)));
                 }
                 
+                saveToLocalStorage();
+
                 showModal('Success', `Invoice ${invoiceData.invoiceId} saved.`);
                 state.currentInvoice = invoiceData;
 
@@ -271,75 +249,13 @@
         };
 
 
-        // --- Firebase Initialization & Authentication ---
-
-        const initializeFirebase = async () => {
-            try {
-                // setLogLevel('debug'); // Uncomment for debugging
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Use session persistence to maintain auth state across tab closing
-                await setPersistence(auth, browserSessionPersistence);
-
-                // Sign in using custom token or anonymously
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Firebase initialization or auth error:", error);
-                // Display clearer error message advising a refresh
-                showModal('Initialization Failed', 
-                    `Error: ${error.message}. This usually means the environment variables failed to load. Please try refreshing the entire page to reset the connection.`
-                );
-            }
-        };
-
-        const setupListeners = () => {
-            // 1. Auth State Listener
-            onAuthStateChanged(auth, async (user) => {
-                userId = user ? user.uid : (typeof crypto !== 'undefined' ? crypto.randomUUID() : 'temp-id');
-                isAuthReady = true;
-
-                // 2. Settings Listener
-                onSnapshot(getSettingsDocRef(), (doc) => {
-                    const settingsData = doc.data();
-                    state.settings = settingsData;
-                    
-                    // Determine initial view only if state is LOADING
-                    if (state.currentView === 'LOADING') {
-                        if (!settingsData || !settingsData.companyProfile) {
-                            state.currentView = 'ONBOARDING';
-                        } else {
-                            state.currentView = 'DASHBOARD';
-                        }
-                    }
-                    updateUI();
-                }, (error) => {
-                    console.error("Error fetching settings:", error);
-                });
-
-                // 3. Invoices Listener
-                onSnapshot(query(getInvoicesCollectionRef()), (snapshot) => {
-                    state.invoices = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
-                    // Only updateUI if we are on a relevant view (not the initial load)
-                    if (state.currentView !== 'LOADING') updateUI();
-                }, (error) => {
-                    console.error("Error fetching invoices:", error);
-                });
-            });
-        };
-
-        // --- View Rendering Logic ---
+        // --- View Rendering Logic (Remains mostly the same) ---
 
         const renderNav = () => {
             const navItems = [
                 { id: 'DASHBOARD', icon: 'fa-house', label: 'Dashboard' },
                 { id: 'HISTORY', icon: 'fa-file-invoice', label: 'Invoices' },
-                { id: 'CLIENTS', icon: 'fa-user-group', label: 'Clients' },
+                // { id: 'CLIENTS', icon: 'fa-user-group', label: 'Clients' }, // Removed for simplicity
                 { id: 'SETTINGS', icon: 'fa-gear', label: 'Settings' }
             ];
             
@@ -371,7 +287,7 @@
                 <div class="flex flex-col items-center justify-center flex-grow p-4">
                     <div class="glass-card p-8 w-full max-w-lg space-y-6">
                         <h2 class="text-3xl font-extrabold text-white text-center">Welcome Aboard!</h2>
-                        <p class="text-center text-gray-300">Let's set up your company profile to start invoicing.</p>
+                        <p class="text-center text-gray-300">Let's set up your company profile to start invoicing. (Data saved to Local Storage)</p>
                         
                         <form id="onboarding-form" class="space-y-4">
                             <div>
@@ -517,7 +433,7 @@
             // Function to add a new blank line item
             const addItem = () => {
                 const newItem = {
-                    itemId: Date.now(), // Use timestamp for a unique key in the session
+                    itemId: crypto.randomUUID(), // Use UUID for a unique key in the session
                     description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00
                 };
                 invoice.items.push(newItem);
@@ -549,7 +465,8 @@
                 // Set up event listeners for line items
                 document.querySelectorAll('.line-item-input').forEach(input => {
                     input.addEventListener('input', (e) => {
-                        const [field, itemId] = e.target.id.split('_');
+                        // The ID is structured as 'field_itemId'
+                        const [field, itemId] = e.target.id.split('_'); 
                         handleItemChange(itemId, field, e.target.value);
                     });
                 });
@@ -572,7 +489,6 @@
                         updateUI();
                     } else if (e.target.dataset.mode) {
                         invoice.design.mode = e.target.dataset.mode;
-                        // Note: A full light/dark mode switch would require changing the body class
                         updateUI();
                     }
                 });
@@ -738,7 +654,7 @@
             return `
                 <div class="p-4 md:p-8 space-y-8">
                     <h2 class="text-3xl font-bold">Welcome back, ${state.settings.companyProfile.companyName}!</h2>
-                    <p class="text-gray-400">User ID: ${userId}</p>
+                    <p class="text-gray-400 italic">Storage: Local Browser Storage Only</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="glass-card p-6 text-center">
@@ -899,8 +815,8 @@
                     content += renderEditor();
                 } else if (state.currentView === 'HISTORY') {
                     content += renderHistory();
-                } else {
-                    content += `<div class="p-8 text-center">View Not Implemented Yet: ${state.currentView}</div>`;
+                } else if (state.currentView === 'SETTINGS') {
+                     content += `<div class="p-8 text-center">Settings view uses the same logic as Onboarding to update data. Please use the initial setup screen for now!</div>`;
                 }
                 content += '</main>';
             }
@@ -933,9 +849,13 @@
 
         // --- Initialization on Window Load ---
         window.onload = async () => {
-            await initializeFirebase();
-            setupListeners();
-            updateUI(); // Initial render of LOADING state
+            // Determine initial view based on whether settings were loaded from local storage
+            if (!state.settings || !state.settings.companyProfile) {
+                state.currentView = 'ONBOARDING';
+            } else {
+                state.currentView = 'DASHBOARD';
+            }
+            updateUI();
         };
 
     </script>
