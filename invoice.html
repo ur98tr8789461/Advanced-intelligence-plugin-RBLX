@@ -84,7 +84,30 @@
 
         // Global Firebase and App Variables (MUST be present for Canvas environment)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        
+        // Define a safe default config in case the environment variable is not set
+        const safeDefaultConfig = {
+            apiKey: "placeholder",
+            authDomain: "placeholder.firebaseapp.com",
+            projectId: "placeholder-project-id", // The required field for the fix
+            storageBucket: "placeholder.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef1234567890"
+        };
+        
+        let firebaseConfig = safeDefaultConfig;
+        try {
+             // Try to parse the real config from the global variable
+            const configString = typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : null;
+            if (configString) {
+                const parsedConfig = JSON.parse(configString);
+                // Merge the parsed config over the safe default to ensure required fields exist
+                firebaseConfig = { ...safeDefaultConfig, ...parsedConfig };
+            }
+        } catch (e) {
+            console.error("Error parsing __firebase_config. Using safe default.", e);
+        }
+        
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let app;
