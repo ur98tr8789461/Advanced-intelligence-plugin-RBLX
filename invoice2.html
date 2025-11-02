@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sleek Glassmorphic Invoicing (Local Storage)</title>
+    <title>Sleek Glassmorphic Invoice Creator</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
@@ -69,14 +69,25 @@
         .glass-card * {
             color: var(--text-color);
         }
+
+        /* FIX: Temporarily disable blur during image capture */
+        #invoice-template-area.is-rendering-image {
+            backdrop-filter: none !important;
+            background-color: var(--bg-color) !important; /* Use solid bg for capture */
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+    <!-- This loading screen is temporary and should be immediately overwritten by JS -->
     <div id="app" class="flex flex-col flex-grow">
-        <!-- Content will be rendered here by JavaScript -->
+        <div class="flex flex-col items-center justify-center flex-grow">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-400"></i>
+            <p class="mt-4 text-gray-400">Initializing Application...</p>
+        </div>
     </div>
 
     <script type="module">
+        
         // --- LOCAL STORAGE IMPLEMENTATION ---
         
         const STORAGE_KEY = 'invoicify_local_data';
@@ -87,7 +98,8 @@
                 const data = localStorage.getItem(STORAGE_KEY);
                 return data ? JSON.parse(data) : { settings: null, clients: [], invoices: [] };
             } catch (e) {
-                console.error("Error loading from local storage", e);
+                console.error("Error loading from local storage (data might be corrupt, resetting to default):", e);
+                // Return default state on error to prevent load failure
                 return { settings: null, clients: [], invoices: [] };
             }
         };
@@ -110,7 +122,7 @@
 
         // --- Application State ---
         const state = {
-            currentView: 'LOADING', // LOADING, ONBOARDING, EDITOR, DASHBOARD, HISTORY
+            currentView: 'DASHBOARD', // Will be overridden immediately by DOMContentLoaded
             settings: initialData.settings, // Stores user settings and company profile
             clients: initialData.clients,
             invoices: initialData.invoices,
@@ -124,22 +136,8 @@
 
         // --- Utility Functions ---
 
-        /**
-         * FIX: Debounce function to prevent repeated function calls (like updateUI) 
-         * on fast-firing events (like keyboard input).
-         */
-        const debounce = (func, delay) => {
-            let timeoutId;
-            return (...args) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(null, args);
-                }, delay);
-            };
-        };
-
-        // Application-wide debounced update (300ms delay)
-        const debouncedUpdateUI = debounce(updateUI, 300);
+        /** Generates a simple, universally compatible unique ID. */
+        const generateUID = () => Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
         
         /** Generates a random, unique Invoice ID based on the current year. */
         const generateInvoiceId = (invoices) => {
@@ -181,7 +179,7 @@
         const newInvoice = () => {
             const inv = {
                 invoiceId: 'NEW_DRAFT',
-                docId: null, // Used for local editing reference
+                docId: generateUID(), // Use generateUID for a unique local ID
                 status: 'Draft',
                 dateIssued: new Date().toISOString().substring(0, 10),
                 dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10), // Net 30 default
@@ -189,7 +187,7 @@
                 paymentTerms: state.settings?.defaultPaymentTerms || 'Net 30',
                 client: {},
                 sender: state.settings?.companyProfile || {},
-                items: [{ itemId: Date.now(), description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00 }],
+                items: [{ itemId: generateUID(), description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00 }], // Use generateUID for item ID
                 totals: {
                     subtotal: 0.00,
                     discountAmount: 0.00,
@@ -233,11 +231,7 @@
                     invoiceData.status = 'Sent'; // Automatically mark as sent when finalizing
                 }
 
-                // Assign a unique local ID if it's a new draft
-                if (!invoiceData.docId) {
-                    invoiceData.docId = crypto.randomUUID();
-                }
-
+                // docId should always exist now thanks to newInvoice() and generateUID()
                 const existingIndex = state.invoices.findIndex(i => i.docId === invoiceData.docId);
 
                 if (existingIndex > -1) {
@@ -266,7 +260,7 @@
         };
 
 
-        // --- View Rendering Logic (Remains mostly the same) ---
+        // --- View Rendering Logic ---
 
         const renderNav = () => {
             const navItems = [
@@ -285,13 +279,13 @@
                     </div>
                     <div class="hidden md:flex space-x-4">
                         ${navItems.map(item => `
-                            <button onclick="changeView('${item.id}')" class="flex items-center space-x-2 p-2 rounded-lg transition ${state.currentView === item.id ? 'bg-blue-800/50 text-white' : 'hover:bg-white/10 text-gray-300'}">
+                            <button onclick="window.changeView('${item.id}')" class="flex items-center space-x-2 p-2 rounded-lg transition ${state.currentView === item.id ? 'bg-blue-800/50 text-white' : 'hover:bg-white/10 text-gray-300'}">
                                 <i class="fa-solid ${item.icon}"></i>
                                 <span>${item.label}</span>
                             </button>
                         `).join('')}
                     </div>
-                    <button onclick="startNewInvoice()" class="btn-primary flex items-center space-x-2">
+                    <button onclick="window.startNewInvoice()" class="btn-primary flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span class="hidden sm:inline">Create Invoice</span>
                     </button>
@@ -300,35 +294,38 @@
         };
 
         const renderOnboarding = () => {
+            // Check for existing values to pre-populate if they exist (for reuse as "Settings")
+            const s = state.settings || { companyProfile: {} };
+            
             return `
                 <div class="flex flex-col items-center justify-center flex-grow p-4">
                     <div class="glass-card p-8 w-full max-w-lg space-y-6">
-                        <h2 class="text-3xl font-extrabold text-white text-center">Welcome Aboard!</h2>
+                        <h2 class="text-3xl font-extrabold text-white text-center">${state.currentView === 'SETTINGS' ? 'Application Settings' : 'Welcome Aboard!'}</h2>
                         <p class="text-center text-gray-300">Let's set up your company profile to start invoicing. (Data saved to Local Storage)</p>
                         
                         <form id="onboarding-form" class="space-y-4">
                             <div>
                                 <label for="companyName" class="block text-sm font-medium text-gray-300">Company Name</label>
-                                <input type="text" id="onboard_companyName" required placeholder="Doe Designs Inc." class="glass-input w-full mt-1">
+                                <input type="text" id="onboard_companyName" value="${s.companyProfile.companyName || ''}" required placeholder="Doe Designs Inc." class="glass-input w-full mt-1">
                             </div>
                             <div>
                                 <label for="logoUrl" class="block text-sm font-medium text-gray-300">Company Logo URL (Placeholder)</label>
-                                <input type="text" id="onboard_logoUrl" placeholder="https://placehold.co/150x50/3b82f6/white?text=LOGO" class="glass-input w-full mt-1">
+                                <input type="text" id="onboard_logoUrl" value="${s.companyProfile.logoUrl || 'https://placehold.co/150x50/3b82f6/white?text=LOGO'}" placeholder="https://placehold.co/150x50/3b82f6/white?text=LOGO" class="glass-input w-full mt-1">
                             </div>
                             <div>
                                 <label for="defaultCurrency" class="block text-sm font-medium text-gray-300">Default Currency</label>
                                 <select id="onboard_defaultCurrency" class="glass-input w-full mt-1">
-                                    <option value="USD">USD ($)</option>
-                                    <option value="EUR">EUR (€)</option>
-                                    <option value="GBP">GBP (£)</option>
+                                    <option value="USD" ${s.defaultCurrency === 'USD' ? 'selected' : ''}>USD ($)</option>
+                                    <option value="EUR" ${s.defaultCurrency === 'EUR' ? 'selected' : ''}>EUR (€)</option>
+                                    <option value="GBP" ${s.defaultCurrency === 'GBP' ? 'selected' : ''}>GBP (£)</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="paymentDetails" class="block text-sm font-medium text-gray-300">Payment Details (Bank Info, etc.)</label>
-                                <textarea id="onboard_paymentDetails" rows="3" placeholder="Bank Name: XYZ, Account: 123456" class="glass-input w-full mt-1"></textarea>
+                                <textarea id="onboard_paymentDetails" rows="3" placeholder="Bank Name: XYZ, Account: 123456" class="glass-input w-full mt-1">${s.paymentDetails || ''}</textarea>
                             </div>
                             
-                            <button type="submit" class="btn-primary w-full mt-6">Finish Setup & Go to Dashboard</button>
+                            <button type="submit" class="btn-primary w-full mt-6">Save Settings & Go to Dashboard</button>
                         </form>
                     </div>
                 </div>
@@ -443,6 +440,37 @@
             `;
         };
 
+        // --- KEYBOARD FIX: New helper function ---
+        /** Renders only the HTML for the totals block in the editor */
+        const renderEditorTotalsSummary = (invoice) => {
+            return `
+                <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Financials</h3>
+                <label class="block text-sm font-medium">Discount Amount (${invoice.currency})</label>
+                <input type="number" id="totals_discountAmount" value="${invoice.totals.discountAmount}" step="0.01" min="0" class="glass-input w-full">
+                <label class="block text-sm font-medium">Tax Rate (%)</label>
+                <input type="number" id="totals_taxRate" value="${(invoice.totals.taxRate * 100).toFixed(0)}" min="0" max="100" class="glass-input w-full">
+                <div class="pt-2 border-t border-white/10 text-lg font-bold">
+                    Grand Total: ${invoice.currency} ${invoice.totals.grandTotal.toFixed(2)}
+                </div>
+            `;
+        };
+
+        // --- KEYBOARD FIX: New lightweight update function ---
+        /** * Selectively updates only the invoice preview and the editor's totals box.
+         * This avoids re-rendering the whole page and closing the keyboard.
+         */
+        const updatePreviewAndTotals = () => {
+            const previewEl = document.getElementById('invoice-preview');
+            if (previewEl) {
+                previewEl.innerHTML = renderInvoicePreview(state.currentInvoice);
+            }
+            const totalsEl = document.getElementById('editor-totals-summary');
+            if (totalsEl) {
+                totalsEl.innerHTML = renderEditorTotalsSummary(state.currentInvoice);
+            }
+        };
+
+
         const renderEditor = () => {
             const invoice = state.currentInvoice;
             if (!invoice) return ``;
@@ -450,7 +478,7 @@
             // Function to add a new blank line item
             const addItem = () => {
                 const newItem = {
-                    itemId: crypto.randomUUID(), // Use UUID for a unique key in the session
+                    itemId: generateUID(), // Use generateUID
                     description: '', quantity: 1, unit: 'Units', unitPrice: 0.00, lineTotal: 0.00
                 };
                 invoice.items.push(newItem);
@@ -464,8 +492,8 @@
                 if (item) {
                     item[field] = field === 'description' || field === 'unit' ? value : parseFloat(value) || 0;
                     calculateTotals(invoice);
-                    // CRITICAL FIX: Debounce the full UI redraw to keep the keyboard open.
-                    debouncedUpdateUI(); 
+                    // KEYBOARD FIX: Call the lightweight update function instead of the full updateUI()
+                    updatePreviewAndTotals(); 
                 }
             };
 
@@ -482,38 +510,57 @@
                 
                 // Set up event listeners for line items
                 document.querySelectorAll('.line-item-input').forEach(input => {
-                    input.addEventListener('input', (e) => {
-                        // The ID is structured as 'field_itemId'
-                        const [field, itemId] = e.target.id.split('_'); 
-                        handleItemChange(itemId, field, e.target.value);
-                    });
+                    input.removeEventListener('input', handleItemChangeWrapper); 
+                    input.addEventListener('input', handleItemChangeWrapper);
                 });
 
+                function handleItemChangeWrapper(e) {
+                    const [field, itemId] = e.target.id.split('_'); 
+                    handleItemChange(itemId, field, e.target.value);
+                }
+
+
                 document.querySelectorAll('.remove-item-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        // Use dataset to get the itemid reliably
-                        const itemId = e.target.dataset.itemid || e.target.closest('button')?.dataset.itemid;
-                        if (itemId) removeItem(itemId);
-                    });
+                    btn.removeEventListener('click', removeItemWrapper);
+                    btn.addEventListener('click', removeItemWrapper);
                 });
+
+                function removeItemWrapper(e) {
+                    const itemId = e.target.dataset.itemid || e.target.closest('button')?.dataset.itemid;
+                    if (itemId) removeItem(itemId);
+                }
+
 
                 // Set up listeners for design controls
                 document.getElementById('design-controls')?.addEventListener('click', (e) => {
                     if (e.target.dataset.template) {
                         invoice.design.templateStyle = e.target.dataset.template;
-                        updateUI();
+                        updateUI(); // Full redraw OK for button clicks
                     } else if (e.target.dataset.theme) {
                         invoice.design.themeColor = e.target.dataset.theme;
-                        updateUI();
+                        updateUI(); // Full redraw OK for button clicks
                     } else if (e.target.dataset.mode) {
                         invoice.design.mode = e.target.dataset.mode;
-                        updateUI();
+                        updateUI(); // Full redraw OK for button clicks
                     }
                 });
 
-                // Set up listeners for core data
-                document.getElementById('core-data-form')?.addEventListener('input', (e) => {
+                // KEYBOARD FIX: Attach listener to the entire left panel
+                const leftPanel = document.getElementById('invoice-editor-left-panel');
+                if (leftPanel) {
+                    leftPanel.removeEventListener('input', handleCoreDataChange);
+                    leftPanel.addEventListener('input', handleCoreDataChange);
+                }
+                
+                function handleCoreDataChange(e) {
+                    // Ignore inputs from line items (handled separately)
+                    if (e.target.classList.contains('line-item-input')) {
+                        return;
+                    }
+
                     const field = e.target.id;
+                    if (!field) return; // Ignore events from non-ID'd elements
+
                     if (field.startsWith('client_')) {
                         const clientField = field.substring(7);
                         if (!invoice.client.address) invoice.client.address = {};
@@ -534,9 +581,9 @@
                         invoice[field] = e.target.value;
                     }
                     
-                    // CRITICAL FIX: Debounce the full UI redraw to keep the keyboard open.
-                    debouncedUpdateUI(); 
-                });
+                    // KEYBOARD FIX: Call the lightweight update function for ALL other fields
+                    updatePreviewAndTotals(); 
+                }
 
                 // Attach Download & Save Handlers
                 document.getElementById('download-pdf-btn')?.addEventListener('click', () => showModal('PDF Generation', 'PDF generation would typically occur server-side or via a library like jsPDF. For now, this is a placeholder.'));
@@ -562,10 +609,11 @@
 
             // Editor UI Layout (Switches from side-by-side on desktop to stacked on mobile)
             return `
-                <!-- FIX: Changed from 'overflow-hidden' to 'overflow-y-auto' on desktop, and 'flex-col md:flex-row' for mobile stacking -->
+                <!-- FIX: Ensuring mobile responsiveness -->
                 <div class="flex flex-col md:flex-row flex-grow"> 
                     <!-- Top/Left: Controls & Data Entry (Full width on mobile) -->
-                    <div class="w-full md:w-1/2 overflow-y-auto p-4 md:p-8 space-y-8">
+                    <!-- KEYBOARD FIX: Added a parent container ID for the event listener -->
+                    <div id="invoice-editor-left-panel" class="w-full md:w-1/2 overflow-y-auto p-4 md:p-8 space-y-8">
                         
                         <!-- 1. Design Controls -->
                         <div id="design-controls" class="glass-card p-4 space-y-4">
@@ -585,55 +633,47 @@
                             </div>
                         </div>
 
-                        <form id="core-data-form" class="space-y-6">
-                            
-                            <!-- 2. Client & Core Info -->
-                            <div class="glass-card p-4 space-y-4">
-                                <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Client Details</h3>
-                                <input type="text" id="client_companyName" value="${invoice.client.companyName || ''}" placeholder="Client Company Name" class="glass-input w-full">
-                                <input type="text" id="client_contactPerson" value="${invoice.client.contactPerson || ''}" placeholder="Contact Person" class="glass-input w-full">
-                                <input type="date" id="dateIssued" value="${invoice.dateIssued}" class="glass-input w-full">
-                                <input type="date" id="dueDate" value="${invoice.dueDate}" class="glass-input w-full">
-                            </div>
+                        <!-- 2. Client & Core Info -->
+                        <div class="glass-card p-4 space-y-4">
+                            <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Client Details</h3>
+                            <input type="text" id="client_companyName" value="${invoice.client.companyName || ''}" placeholder="Client Company Name" class="glass-input w-full">
+                            <input type="text" id="client_contactPerson" value="${invoice.client.contactPerson || ''}" placeholder="Contact Person" class="glass-input w-full">
+                            <input type="date" id="dateIssued" value="${invoice.dateIssued}" class="glass-input w-full">
+                            <input type="date" id="dueDate" value="${invoice.dueDate}" class="glass-input w-full">
+                        </div>
 
-                            <!-- 3. Line Items Editor -->
-                            <div class="glass-card p-4 space-y-4">
-                                <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Work Items</h3>
-                                <div class="grid grid-cols-6 gap-3 mb-2 font-semibold text-sm text-gray-400">
-                                    <div class="col-span-2">Description</div>
-                                    <div>Unit</div>
-                                    <div>Qty</div>
-                                    <div>Price</div>
-                                    <div class="text-right">Total</div>
-                                    <div></div>
-                                </div>
-                                ${lineItemRows}
-                                <button type="button" id="add-item-btn" class="flex items-center space-x-1 text-blue-400 hover:text-blue-500 transition">
-                                    <i class="fa-solid fa-circle-plus"></i> <span>Add Work Item</span>
-                                </button>
+                        <!-- 3. Line Items Editor -->
+                        <div class="glass-card p-4 space-y-4">
+                            <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Work Items</h3>
+                            <div class="grid grid-cols-6 gap-3 mb-2 font-semibold text-sm text-gray-400">
+                                <div class="col-span-2">Description</div>
+                                <div>Unit</div>
+                                <div>Qty</div>
+                                <div>Price</div>
+                                <div class="text-right">Total</div>
+                                <div></div>
                             </div>
-                            
-                            <!-- 4. Totals & Notes -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="glass-card p-4 space-y-2">
-                                    <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Financials</h3>
-                                    <label class="block text-sm font-medium">Discount Amount (${invoice.currency})</label>
-                                    <input type="number" id="totals_discountAmount" value="${invoice.totals.discountAmount}" step="0.01" min="0" class="glass-input w-full">
-                                    <label class="block text-sm font-medium">Tax Rate (%)</label>
-                                    <input type="number" id="totals_taxRate" value="${(invoice.totals.taxRate * 100).toFixed(0)}" min="0" max="100" class="glass-input w-full">
-                                    <div class="pt-2 border-t border-white/10 text-lg font-bold">
-                                        Grand Total: ${invoice.currency} ${invoice.totals.grandTotal.toFixed(2)}
-                                    </div>
-                                </div>
-                                <div class="glass-card p-4 space-y-2">
-                                    <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Notes & Instructions</h3>
-                                    <textarea id="notes" rows="2" placeholder="Notes (e.g., Thank you)" class="glass-input w-full">${invoice.notes}</textarea>
-                                    <textarea id="paymentInstructions" rows="3" placeholder="Payment Instructions" class="glass-input w-full">${invoice.paymentInstructions}</textarea>
-                                </div>
-                            </div>
-
-                        </form>
+                            ${lineItemRows}
+                            <button type="button" id="add-item-btn" class="flex items-center space-x-1 text-blue-400 hover:text-blue-500 transition">
+                                <i class="fa-solid fa-circle-plus"></i> <span>Add Work Item</span>
+                            </button>
+                        </div>
                         
+                        <!-- 4. Totals & Notes -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glass-card p-4 space-y-2">
+                                <!-- KEYBOARD FIX: Added an ID here so we can replace its content -->
+                                <div id="editor-totals-summary">
+                                    ${renderEditorTotalsSummary(invoice)}
+                                </div>
+                            </div>
+                            <div class="glass-card p-4 space-y-2">
+                                <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Notes & Instructions</h3>
+                                <textarea id="notes" rows="2" placeholder="Notes (e.g., Thank you)" class="glass-input w-full">${invoice.notes}</textarea>
+                                <textarea id="paymentInstructions" rows="3" placeholder="Payment Instructions" class="glass-input w-full">${invoice.paymentInstructions}</textarea>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Bottom/Right Panel: Live Preview & Actions (Full width on mobile, right on desktop) -->
@@ -657,6 +697,7 @@
                                 <span>Finalize & Send</span>
                             </button>
                         </div>
+                        <!-- KEYBOARD FIX: Added an ID here so we can replace its content -->
                         <div id="invoice-preview" class="flex-grow">
                             ${renderInvoicePreview(invoice)}
                         </div>
@@ -666,7 +707,7 @@
         };
 
         const renderDashboard = () => {
-            if (!state.settings) return `<div class="p-8 text-center">Loading Settings...</div>`;
+            if (!state.settings) return `<div class="p-8 text-center text-red-400">Settings not loaded. Please complete onboarding.</div>`;
             
             const totalInvoices = state.invoices.length;
             const paidInvoices = state.invoices.filter(i => i.status === 'Paid').length;
@@ -698,8 +739,8 @@
                     <div class="glass-card p-6">
                         <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
                         <div class="flex flex-wrap gap-4">
-                            <button onclick="startNewInvoice()" class="btn-primary"><i class="fa-solid fa-plus mr-2"></i> Create New Invoice</button>
-                            <button onclick="changeView('HISTORY')" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-file-invoice mr-2"></i> View History</button>
+                            <button onclick="window.startNewInvoice()" class="btn-primary"><i class="fa-solid fa-plus mr-2"></i> Create New Invoice</button>
+                            <button onclick="window.changeView('HISTORY')" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"><i class="fa-solid fa-file-invoice mr-2"></i> View History</button>
                         </div>
                     </div>
 
@@ -736,8 +777,8 @@
                                             <span class="p-1 rounded-full text-xs font-semibold ${inv.status === 'Paid' ? 'bg-green-600' : inv.status === 'Overdue' ? 'bg-red-600' : 'bg-blue-600'} text-white">${inv.status}</span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <button onclick="editInvoice('${inv.docId}')" class="text-blue-400 hover:text-blue-500 mr-2"><i class="fa-solid fa-pen"></i></button>
-                                            <button onclick="showModal('Action', 'Payment recorded for ${inv.invoiceId}')" class="text-green-400 hover:text-green-500"><i class="fa-solid fa-money-bill-transfer"></i></button>
+                                            <button onclick="window.editInvoice('${inv.docId}')" class="text-blue-400 hover:text-blue-500 mr-2"><i class="fa-solid fa-pen"></i></button>
+                                            <button onclick="window.showModal('Action', 'Payment recorded for ${inv.invoiceId}')" class="text-green-400 hover:text-green-500"><i class="fa-solid fa-money-bill-transfer"></i></button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -755,7 +796,7 @@
                     <div class="glass-card p-6 w-full max-w-sm">
                         <h3 class="text-xl font-bold mb-3">${state.modal.title}</h3>
                         <p class="text-gray-300 mb-5">${state.modal.message}</p>
-                        <button onclick="closeModal()" class="btn-primary w-full">Close</button>
+                        <button onclick="window.closeModal()" class="btn-primary w-full">Close</button>
                     </div>
                 </div>
             `;
@@ -763,6 +804,7 @@
         
         // --- Core Application Logic ---
 
+        // Attaching core functions to window for onclick handlers in HTML
         window.changeView = (view) => {
             state.currentView = view;
             updateUI();
@@ -770,7 +812,7 @@
 
         window.startNewInvoice = () => {
             state.currentInvoice = newInvoice();
-            changeView('EDITOR');
+            window.changeView('EDITOR');
         };
 
         window.editInvoice = (docId) => {
@@ -778,30 +820,35 @@
             if (invoiceToEdit) {
                 state.currentInvoice = JSON.parse(JSON.stringify(invoiceToEdit)); // Deep copy for editing
                 calculateTotals(state.currentInvoice);
-                changeView('EDITOR');
+                window.changeView('EDITOR');
             } else {
-                showModal('Error', 'Invoice not found.');
+                window.showModal('Error', 'Invoice not found.');
             }
         };
+
+        window.showModal = showModal;
 
         window.closeModal = () => {
             state.modal.isVisible = false;
             updateUI();
         };
 
+        // IMAGE GENERATION FIX
         const generateImage = () => {
             const previewElement = document.getElementById('invoice-template-area');
             if (!previewElement) {
-                return showModal('Error', 'Invoice preview element not found.');
+                return window.showModal('Error', 'Invoice preview element not found.');
             }
             
-            showModal('Generating Image...', 'Please wait while we capture the invoice as a high-quality PNG.');
+            window.showModal('Generating Image...', 'Please wait while we capture the invoice as a high-quality PNG.');
 
-            // Use html2canvas to capture the rendered invoice area
+            // FIX: Add class to disable blur effect before capture
+            previewElement.classList.add('is-rendering-image');
+
             html2canvas(previewElement, {
                 scale: 2, // Higher resolution
                 useCORS: true, // Handle images/logos if from another domain
-                backgroundColor: null, // Transparent background if possible
+                backgroundColor: '#030712', // Solid background color for capture
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -810,24 +857,31 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                closeModal(); // Close the "Generating" modal
-                showModal('Success', 'Invoice image downloaded successfully!');
+                window.closeModal(); // Close the "Generating" modal
+                window.showModal('Success', 'Invoice image downloaded successfully!');
             }).catch(error => {
                 console.error('Error generating image:', error);
-                showModal('Error', 'Failed to generate image. See console for details.');
+                window.showModal('Error', 'Failed to generate image. See console for details.');
+            }).finally(() => {
+                // FIX: ALWAYS remove the class after capture, even if it fails
+                previewElement.classList.remove('is-rendering-image');
             });
         };
 
+        /** * The main UI rendering function. This re-draws the entire application.
+         * It is HEAVY and should only be called for major view changes (e.g., changing pages).
+         */
         const updateUI = () => {
             const appDiv = document.getElementById('app');
+            if (!appDiv) {
+                console.error("Critical Error: #app element not found.");
+                return;
+            }
+            
             let content = '';
             
-            if (state.currentView === 'LOADING') {
-                content = `<div class="flex flex-col items-center justify-center flex-grow"><i class="fa-solid fa-spinner fa-spin text-4xl text-blue-400"></i><p class="mt-4">Initializing Application...</p></div>`;
-            } else if (state.currentView === 'ONBOARDING') {
-                content = renderOnboarding();
-            } else {
-                // All other views include the navigation bar
+            // Only render full application views (Nav + Content)
+            if (['DASHBOARD', 'EDITOR', 'HISTORY', 'SETTINGS'].includes(state.currentView)) {
                 content += renderNav();
                 content += '<main class="flex-grow">';
                 if (state.currentView === 'DASHBOARD') {
@@ -837,15 +891,25 @@
                 } else if (state.currentView === 'HISTORY') {
                     content += renderHistory();
                 } else if (state.currentView === 'SETTINGS') {
-                     content += `<div class="p-8 text-center">Settings view uses the same logic as Onboarding to update data. Please use the initial setup screen for now!</div>`;
+                     // The settings view now uses the same form as onboarding
+                    content += renderOnboarding();
                 }
                 content += '</main>';
+            } else if (state.currentView === 'ONBOARDING') {
+                content = renderOnboarding();
+            } else {
+                // Fallback for an unknown view state
+                content = `<div class="flex flex-col items-center justify-center flex-grow p-8 text-red-400">
+                    <i class="fa-solid fa-triangle-exclamation text-4xl mb-4"></i>
+                    <p>Unknown view state: ${state.currentView}. Please refresh.</p>
+                </div>`;
             }
+
 
             appDiv.innerHTML = content + renderModal();
 
-            // Setup Onboarding Listener after rendering
-            if (state.currentView === 'ONBOARDING') {
+            // Setup Onboarding/Settings Form Listener after rendering
+            if (state.currentView === 'ONBOARDING' || state.currentView === 'SETTINGS') {
                 document.getElementById('onboarding-form')?.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const companyName = document.getElementById('onboard_companyName').value;
@@ -857,8 +921,8 @@
                         companyProfile: { companyName, logoUrl, taxId: 'N/A' },
                         defaultCurrency,
                         defaultPaymentTerms: 'Net 30',
-                        defaultTaxRate: 0.00,
-                        defaultNotes: 'Thank you for your business!',
+                        defaultTaxRate: state.settings?.defaultTaxRate || 0.00, // Preserve previous tax rate if it exists
+                        defaultNotes: state.settings?.defaultNotes || 'Thank you for your business!', // Preserve previous notes
                         paymentDetails
                     };
                     saveSettings(settingsData);
@@ -868,18 +932,37 @@
             }
         };
 
-        // --- Initialization on Window Load ---
-        window.onload = async () => {
-            // Determine initial view based on whether settings were loaded from local storage
-            if (!state.settings || !state.settings.companyProfile) {
-                state.currentView = 'ONBOARDING';
-            } else {
-                state.currentView = 'DASHBOARD';
+        // --- Initialization on DOM Content Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Determine initial view: if settings are incomplete, go to ONBOARDING. Otherwise, DASHBOARD.
+                const needsOnboarding = !state.settings || !state.settings.companyProfile || !state.settings.companyProfile.companyName;
+
+                if (needsOnboarding) {
+                    state.currentView = 'ONBOARDING';
+                    console.log("App Init: Starting Onboarding.");
+                } else {
+                    state.currentView = 'DASHBOARD';
+                    console.log("App Init: Starting Dashboard.");
+                }
+                
+                // Immediately call updateUI to overwrite the initial loading content
+                updateUI();
+            } catch (error) {
+                console.error("FATAL APP INITIALIZATION ERROR:", error);
+                const appDiv = document.getElementById('app');
+                if (appDiv) {
+                    // Display a human-readable error if the script crashes during init
+                    appDiv.innerHTML = `<div class="p-8 text-center text-red-500">
+                        <h2 class="text-2xl font-bold">App Startup Failed!</h2>
+                        <p class="mt-2">A critical error occurred while starting the application. Please check the browser console for specific details (F12 or Cmd+Option+J).</p>
+                    </div>`;
+                }
             }
-            updateUI();
-        };
+        });
 
     </script>
 </body>
 </html>
+
 
