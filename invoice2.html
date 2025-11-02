@@ -70,10 +70,15 @@
             color: var(--text-color);
         }
 
-        /* FIX: Temporarily disable blur during image capture */
+        /* IMAGE FIX: Temporarily disable blur AND other complex CSS during image capture */
         #invoice-template-area.is-rendering-image {
             backdrop-filter: none !important;
+            box-shadow: none !important;
             background-color: var(--bg-color) !important; /* Use solid bg for capture */
+        }
+        /* IMAGE FIX: Hide the logo during capture to prevent CORS errors */
+        #invoice-template-area.is-rendering-image .invoice-logo {
+            display: none !important;
         }
     </style>
 </head>
@@ -359,7 +364,8 @@
                                 <p class="text-sm text-gray-500 mt-1">Status: <span class="${invoice.status === 'Sent' ? 'text-blue-400' : invoice.status === 'Draft' ? 'text-yellow-400' : 'text-green-400'} font-semibold">${invoice.status}</span></p>
                             </div>
                             <div class="text-right">
-                                ${companyProfile?.logoUrl ? `<img src="${companyProfile.logoUrl}" onerror="this.onerror=null;this.src='https://placehold.co/150x50/3b82f6/white?text=LOGO';" alt="Logo" class="h-10 mb-2 inline-block">` : `<span class="text-xl font-extrabold text-blue-400">${companyProfile?.companyName || 'YOUR COMPANY'}</span>`}
+                                <!-- IMAGE FIX: Added 'invoice-logo' class to hide during capture -->
+                                ${companyProfile?.logoUrl ? `<img src="${companyProfile.logoUrl}" onerror="this.onerror=null;this.src='https://placehold.co/150x50/3b82f6/white?text=LOGO';" alt="Logo" class="h-10 mb-2 inline-block invoice-logo">` : `<span class="text-xl font-extrabold text-blue-400 invoice-logo">${companyProfile?.companyName || 'YOUR COMPANY'}</span>`}
                                 <p class="text-sm text-gray-400">${companyProfile?.companyName || ''}</p>
                             </div>
                         </div>
@@ -440,7 +446,6 @@
             `;
         };
 
-        // --- KEYBOARD FIX: New helper function ---
         /** Renders only the HTML for the totals block in the editor */
         const renderEditorTotalsSummary = (invoice) => {
             return `
@@ -455,7 +460,6 @@
             `;
         };
 
-        // --- KEYBOARD FIX: New lightweight update function ---
         /** * Selectively updates only the invoice preview and the editor's totals box.
          * This avoids re-rendering the whole page and closing the keyboard.
          */
@@ -492,7 +496,6 @@
                 if (item) {
                     item[field] = field === 'description' || field === 'unit' ? value : parseFloat(value) || 0;
                     calculateTotals(invoice);
-                    // KEYBOARD FIX: Call the lightweight update function instead of the full updateUI()
                     updatePreviewAndTotals(); 
                 }
             };
@@ -792,10 +795,10 @@
         const renderModal = () => {
             if (!state.modal.isVisible) return '';
             return `
-                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center">
+                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div class="glass-card p-6 w-full max-w-sm">
                         <h3 class="text-xl font-bold mb-3">${state.modal.title}</h3>
-                        <p class="text-gray-300 mb-5">${state.modal.message}</p>
+                        <p class="text-gray-300 mb-5 break-words">${state.modal.message}</p>
                         <button onclick="window.closeModal()" class="btn-primary w-full">Close</button>
                     </div>
                 </div>
@@ -835,6 +838,11 @@
 
         // IMAGE GENERATION FIX
         const generateImage = () => {
+            // 1. Check if library is loaded
+            if (typeof html2canvas === 'undefined') {
+                return window.showModal('Error', 'Image generation library (html2canvas) failed to load. Please check your internet connection or ad blocker.');
+            }
+            
             const previewElement = document.getElementById('invoice-template-area');
             if (!previewElement) {
                 return window.showModal('Error', 'Invoice preview element not found.');
@@ -842,13 +850,14 @@
             
             window.showModal('Generating Image...', 'Please wait while we capture the invoice as a high-quality PNG.');
 
-            // FIX: Add class to disable blur effect before capture
+            // FIX: Add class to disable blur/shadows/logo
             previewElement.classList.add('is-rendering-image');
 
             html2canvas(previewElement, {
                 scale: 2, // Higher resolution
-                useCORS: true, // Handle images/logos if from another domain
+                useCORS: true, // Still good to keep
                 backgroundColor: '#030712', // Solid background color for capture
+                logging: false // Suppress console logs from the library
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -861,9 +870,10 @@
                 window.showModal('Success', 'Invoice image downloaded successfully!');
             }).catch(error => {
                 console.error('Error generating image:', error);
-                window.showModal('Error', 'Failed to generate image. See console for details.');
+                // FIX: Show the actual error message to the user
+                window.showModal('Error Generating Image', `Failed to generate image. The error was: "${error.message}". This is often due to cross-origin images (like logos).`);
             }).finally(() => {
-                // FIX: ALWAYS remove the class after capture, even if it fails
+                // FIX: ALWAYS remove the class after capture
                 previewElement.classList.remove('is-rendering-image');
             });
         };
