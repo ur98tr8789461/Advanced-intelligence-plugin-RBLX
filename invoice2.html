@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.latest/css/all.min.css">
     <!-- Load HTML2Canvas for Image/PNG Generation -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
@@ -69,16 +69,86 @@
         .glass-card * {
             color: var(--text-color);
         }
-
-        /* IMAGE FIX: Temporarily disable blur AND other complex CSS during image capture */
+        
+        /* === PNG CAPTURE MODE (Used by html2canvas) === */
+        /* Forces a reliable white background/black text state during capture */
         #invoice-template-area.is-rendering-image {
+            /* Aggressively disable all complex glass effects */
             backdrop-filter: none !important;
             box-shadow: none !important;
-            background-color: var(--bg-color) !important; /* Use solid bg for capture */
+            background-color: white !important; /* Force solid white background */
+            color: black !important; /* Set text to black */
+            border: none !important; /* Remove borders */
+            transition: none !important; /* Disable any transition during the brief capture window */
         }
-        /* IMAGE FIX: Hide the logo during capture to prevent CORS errors */
+        
+        /* Force all children's colors to black, overriding dark mode settings */
+        #invoice-template-area.is-rendering-image * {
+            color: black !important; 
+        }
+
+        /* Re-color specific elements that need distinction (e.g., status, totals) */
+        #invoice-template-area.is-rendering-image .text-blue-400 { color: #3b82f6 !important; } /* Blue-500 */
+        #invoice-template-area.is-rendering-image .text-yellow-400 { color: #facc15 !important; } /* Yellow-400 */
+        #invoice-template-area.is-rendering-image .text-green-400 { color: #4ade80 !important; } /* Green-400 */
+        
+        /* Hide the logo during capture to prevent CORS errors (as before) */
         #invoice-template-area.is-rendering-image .invoice-logo {
-            display: none !important;
+            display: block !important; /* Display the logo, but its source must be a safe placeholder URL */
+        }
+        /* Ensure table lines are black on white */
+        #invoice-template-area.is-rendering-image .border-b,
+        #invoice-template-area.is-rendering-image .border-t,
+        #invoice-template-area.is-rendering-image .border-white\/10 {
+            border-color: #d1d5db !important; /* Light gray border */
+        }
+        
+        /* --- PDF PRINT STYLES (Used by window.print()) --- */
+        @media print {
+            body {
+                background-color: white !important;
+                color: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important; /* Prevent scrollbars on print */
+            }
+            /* Hide the navigation and controls, leaving only the invoice area */
+            .glass-card:not(#invoice-template-area), 
+            nav, 
+            .editor-controls, 
+            #invoice-editor-left-panel,
+            .bg-gray-900\/80 { /* Hide the save/download bar */
+                display: none !important;
+            }
+            
+            /* Make the invoice template the only visible thing, full size, no glass effect */
+            #invoice-template-area {
+                width: 100% !important;
+                max-width: none !important;
+                min-height: auto !important;
+                background-color: white !important;
+                backdrop-filter: none !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 30px !important; /* Add padding for margin on print */
+                color: black !important;
+            }
+            /* Ensure all invoice text is black */
+            #invoice-template-area * {
+                color: black !important;
+            }
+            /* Re-add color for status/totals */
+            #invoice-template-area .text-blue-400 { color: #3b82f6 !important; }
+            #invoice-template-area .text-yellow-400 { color: #facc15 !important; }
+            #invoice-template-area .text-green-400 { color: #4ade80 !important; }
+            
+            /* Ensure borders are visible in print */
+            #invoice-template-area .border-b,
+            #invoice-template-area .border-t,
+            #invoice-template-area .border-white\/10 {
+                border-color: #d1d5db !important;
+            }
         }
     </style>
 </head>
@@ -271,7 +341,6 @@
             const navItems = [
                 { id: 'DASHBOARD', icon: 'fa-house', label: 'Dashboard' },
                 { id: 'HISTORY', icon: 'fa-file-invoice', label: 'Invoices' },
-                // { id: 'CLIENTS', icon: 'fa-user-group', label: 'Clients' }, // Removed for simplicity
                 { id: 'SETTINGS', icon: 'fa-gear', label: 'Settings' }
             ];
             
@@ -297,46 +366,55 @@
                 </nav>
             `;
         };
+        
+        /** Renders the settings/onboarding form. */
+        const renderSettingsForm = () => {
+            // Use existing settings data or default values for form inputs
+            const settings = state.settings || { companyProfile: {} };
+            const profile = settings.companyProfile || {};
+            const isSettingsView = state.currentView === 'SETTINGS';
 
-        const renderOnboarding = () => {
-            // Check for existing values to pre-populate if they exist (for reuse as "Settings")
-            const s = state.settings || { companyProfile: {} };
-            
             return `
-                <div class="flex flex-col items-center justify-center flex-grow p-4">
-                    <div class="glass-card p-8 w-full max-w-lg space-y-6">
-                        <h2 class="text-3xl font-extrabold text-white text-center">${state.currentView === 'SETTINGS' ? 'Application Settings' : 'Welcome Aboard!'}</h2>
-                        <p class="text-center text-gray-300">Let's set up your company profile to start invoicing. (Data saved to Local Storage)</p>
+                <div class="p-4 md:p-8 space-y-8">
+                    <h2 class="text-3xl font-bold">${isSettingsView ? 'Application Settings' : 'Welcome! Let\'s Get Started'}</h2>
+                    <p class="text-gray-400">${isSettingsView ? 'Update your company and default invoice details.' : 'Please enter your core company details to begin creating invoices.'}</p>
+                    <form id="onboarding-form" class="glass-card p-6 space-y-5 w-full max-w-xl mx-auto">
+                        <h3 class="text-xl font-semibold mb-4 border-b border-white/10 pb-2">Company Profile</h3>
                         
-                        <form id="onboarding-form" class="space-y-4">
-                            <div>
-                                <label for="companyName" class="block text-sm font-medium text-gray-300">Company Name</label>
-                                <input type="text" id="onboard_companyName" value="${s.companyProfile.companyName || ''}" required placeholder="Doe Designs Inc." class="glass-input w-full mt-1">
-                            </div>
-                            <div>
-                                <label for="logoUrl" class="block text-sm font-medium text-gray-300">Company Logo URL (Placeholder)</label>
-                                <input type="text" id="onboard_logoUrl" value="${s.companyProfile.logoUrl || 'https://placehold.co/150x50/3b82f6/white?text=LOGO'}" placeholder="https://placehold.co/150x50/3b82f6/white?text=LOGO" class="glass-input w-full mt-1">
-                            </div>
-                            <div>
-                                <label for="defaultCurrency" class="block text-sm font-medium text-gray-300">Default Currency</label>
-                                <select id="onboard_defaultCurrency" class="glass-input w-full mt-1">
-                                    <option value="USD" ${s.defaultCurrency === 'USD' ? 'selected' : ''}>USD ($)</option>
-                                    <option value="EUR" ${s.defaultCurrency === 'EUR' ? 'selected' : ''}>EUR (€)</option>
-                                    <option value="GBP" ${s.defaultCurrency === 'GBP' ? 'selected' : ''}>GBP (£)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="paymentDetails" class="block text-sm font-medium text-gray-300">Payment Details (Bank Info, etc.)</label>
-                                <textarea id="onboard_paymentDetails" rows="3" placeholder="Bank Name: XYZ, Account: 123456" class="glass-input w-full mt-1">${s.paymentDetails || ''}</textarea>
-                            </div>
-                            
-                            <button type="submit" class="btn-primary w-full mt-6">Save Settings & Go to Dashboard</button>
-                        </form>
-                    </div>
+                        <div>
+                            <label for="onboard_companyName" class="block text-sm font-medium mb-1">Company Name *</label>
+                            <input type="text" id="onboard_companyName" value="${profile.companyName || ''}" placeholder="Your Company Name" required class="glass-input w-full">
+                        </div>
+                        
+                        <div>
+                            <label for="onboard_logoUrl" class="block text-sm font-medium mb-1">Logo URL (Optional, for Invoice Header)</label>
+                            <input type="url" id="onboard_logoUrl" value="${profile.logoUrl || ''}" placeholder="https://placehold.co/150x50/3b82f6/white?text=LOGO" class="glass-input w-full">
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4 border-b border-white/10 pt-4 pb-2">Invoice Defaults</h3>
+
+                        <div>
+                            <label for="onboard_defaultCurrency" class="block text-sm font-medium mb-1">Default Currency Code</label>
+                            <select id="onboard_defaultCurrency" class="glass-input w-full">
+                                <option value="USD" ${settings.defaultCurrency === 'USD' ? 'selected' : ''}>USD - US Dollar</option>
+                                <option value="EUR" ${settings.defaultCurrency === 'EUR' ? 'selected' : ''}>EUR - Euro</option>
+                                <option value="GBP" ${settings.defaultCurrency === 'GBP' ? 'selected' : ''}>GBP - British Pound</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="onboard_paymentDetails" class="block text-sm font-medium mb-1">Payment Instructions (Bank/ACH Details)</label>
+                            <textarea id="onboard_paymentDetails" rows="3" placeholder="e.g., Bank Name: ABC Bank, Account: 12345678" class="glass-input w-full">${settings.paymentDetails || ''}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full mt-4">
+                            ${isSettingsView ? 'Save Settings' : 'Start Invoicify'}
+                        </button>
+                    </form>
                 </div>
             `;
         };
-        
+
         const renderInvoicePreview = (invoice) => {
             const { companyProfile } = state.settings || {};
             const { design } = invoice;
@@ -352,6 +430,9 @@
             } else if (design.templateStyle === 'Sleek') {
                 cardClass = 'bg-gray-900/50 p-6 shadow-lg border-l-4 border-blue-400';
             }
+            
+            // Use the fallback URL for the logo, which is already a placeholder and avoids CORS.
+            const logoUrl = companyProfile?.logoUrl || 'https://placehold.co/150x50/3b82f6/white?text=LOGO';
 
             return `
                 <div class="h-full overflow-y-auto p-4 md:p-8">
@@ -364,8 +445,8 @@
                                 <p class="text-sm text-gray-500 mt-1">Status: <span class="${invoice.status === 'Sent' ? 'text-blue-400' : invoice.status === 'Draft' ? 'text-yellow-400' : 'text-green-400'} font-semibold">${invoice.status}</span></p>
                             </div>
                             <div class="text-right">
-                                <!-- IMAGE FIX: Added 'invoice-logo' class to hide during capture -->
-                                ${companyProfile?.logoUrl ? `<img src="${companyProfile.logoUrl}" onerror="this.onerror=null;this.src='https://placehold.co/150x50/3b82f6/white?text=LOGO';" alt="Logo" class="h-10 mb-2 inline-block invoice-logo">` : `<span class="text-xl font-extrabold text-blue-400 invoice-logo">${companyProfile?.companyName || 'YOUR COMPANY'}</span>`}
+                                <!-- CRITICAL: Use the logo URL or fallback placeholder -->
+                                ${companyProfile?.logoUrl ? `<img src="${logoUrl}" onerror="this.onerror=null;this.src='https://placehold.co/150x50/3b82f6/white?text=LOGO';" alt="Logo" class="h-10 mb-2 inline-block invoice-logo">` : `<span class="text-xl font-extrabold text-blue-400 invoice-logo">${companyProfile?.companyName || 'YOUR COMPANY'}</span>`}
                                 <p class="text-sm text-gray-400">${companyProfile?.companyName || ''}</p>
                             </div>
                         </div>
@@ -446,7 +527,6 @@
             `;
         };
 
-        /** Renders only the HTML for the totals block in the editor */
         const renderEditorTotalsSummary = (invoice) => {
             return `
                 <h3 class="text-xl font-semibold border-b border-white/10 pb-2">Financials</h3>
@@ -589,7 +669,12 @@
                 }
 
                 // Attach Download & Save Handlers
-                document.getElementById('download-pdf-btn')?.addEventListener('click', () => showModal('PDF Generation', 'PDF generation would typically occur server-side or via a library like jsPDF. For now, this is a placeholder.'));
+                // *** UPDATED PDF BUTTON TO TRIGGER BROWSER PRINT DIALOG ***
+                document.getElementById('download-pdf-btn')?.addEventListener('click', () => {
+                    window.print();
+                });
+                // *********************************************************
+                
                 document.getElementById('download-image-btn')?.addEventListener('click', generateImage);
                 document.getElementById('save-draft-btn')?.addEventListener('click', () => saveInvoice(invoice, { final: false }));
                 document.getElementById('finalize-send-btn')?.addEventListener('click', () => saveInvoice(invoice, { final: true }));
@@ -619,11 +704,11 @@
                     <div id="invoice-editor-left-panel" class="w-full md:w-1/2 overflow-y-auto p-4 md:p-8 space-y-8">
                         
                         <!-- 1. Design Controls -->
-                        <div id="design-controls" class="glass-card p-4 space-y-4">
+                        <div class="glass-card p-4 space-y-4">
                             <h3 class="text-xl font-semibold border-b border-white/10 pb-2 mb-4">Design & Theme</h3>
                             
                             <p class="font-medium text-gray-300">Style:</p>
-                            <div class="flex space-x-2">
+                            <div id="design-controls" class="flex space-x-2">
                                 ${['Glassmorphism', 'Modern', 'Sleek'].map(t => `
                                     <button data-template="${t}" class="p-2 rounded-lg text-sm transition ${invoice.design.templateStyle === t ? 'bg-blue-600' : 'bg-white/10 hover:bg-white/20'}">${t}</button>
                                 `).join('')}
@@ -814,6 +899,9 @@
         };
 
         window.startNewInvoice = () => {
+            if (!state.settings || !state.settings.companyProfile?.companyName) {
+                return showModal('Setup Required', 'Please complete your company settings first before creating an invoice.');
+            }
             state.currentInvoice = newInvoice();
             window.changeView('EDITOR');
         };
@@ -836,11 +924,10 @@
             updateUI();
         };
 
-        // IMAGE GENERATION FIX
+        // IMAGE GENERATION FIX (Final, Aggressive Fix with Timing Control)
         const generateImage = () => {
-            // 1. Check if library is loaded
             if (typeof html2canvas === 'undefined') {
-                return window.showModal('Error', 'Image generation library (html2canvas) failed to load. Please check your internet connection or ad blocker.');
+                return window.showModal('Error', 'Image generation library (html2canvas) failed to load.');
             }
             
             const previewElement = document.getElementById('invoice-template-area');
@@ -848,33 +935,42 @@
                 return window.showModal('Error', 'Invoice preview element not found.');
             }
             
-            window.showModal('Generating Image...', 'Please wait while we capture the invoice as a high-quality PNG.');
+            window.showModal('Generating Image...', 'Please wait while we capture the invoice as a high-quality PNG. (The design is temporarily simplified for capture)');
 
-            // FIX: Add class to disable blur/shadows/logo
+            // 1. Force "Print Mode" class to reset styling
             previewElement.classList.add('is-rendering-image');
 
-            html2canvas(previewElement, {
-                scale: 2, // Higher resolution
-                useCORS: true, // Still good to keep
-                backgroundColor: '#030712', // Solid background color for capture
-                logging: false // Suppress console logs from the library
-            }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.href = imgData;
-                link.download = `${state.currentInvoice.invoiceId || 'draft'}-invoice.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.closeModal(); // Close the "Generating" modal
-                window.showModal('Success', 'Invoice image downloaded successfully!');
-            }).catch(error => {
-                console.error('Error generating image:', error);
-                // FIX: Show the actual error message to the user
-                window.showModal('Error Generating Image', `Failed to generate image. The error was: "${error.message}". This is often due to cross-origin images (like logos).`);
-            }).finally(() => {
-                // FIX: ALWAYS remove the class after capture
-                previewElement.classList.remove('is-rendering-image');
+            // 2. Use requestAnimationFrame to ensure the browser has time to apply the CSS changes
+            requestAnimationFrame(() => {
+                // 3. Add a small delay (10ms) to ensure reflow is complete before capture
+                setTimeout(() => {
+                    html2canvas(previewElement, {
+                        scale: 2, // Higher resolution
+                        useCORS: true, 
+                        backgroundColor: 'white', // Explicitly set background to white for PNG conversion
+                        logging: false 
+                    }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.href = imgData;
+                        link.download = `${state.currentInvoice.invoiceId || 'draft'}-invoice.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        window.closeModal(); // Close the "Generating" modal
+                        window.showModal('Success', 'Invoice image downloaded successfully!');
+
+                    }).catch(error => {
+                        console.error('Error generating image:', error);
+                        // Show the actual error message (or 'undefined' if still generic)
+                        const errorMessage = error.message || "undefined";
+                        window.showModal('Error Generating Image', `Failed to generate image. The error was: "${errorMessage}". This is often due to complex rendering effects.`);
+                    }).finally(() => {
+                        // CRITICAL: ALWAYS remove the class to revert to glassmorphic design
+                        previewElement.classList.remove('is-rendering-image');
+                    });
+                }, 10); // 10ms delay to allow render
             });
         };
 
@@ -901,12 +997,11 @@
                 } else if (state.currentView === 'HISTORY') {
                     content += renderHistory();
                 } else if (state.currentView === 'SETTINGS') {
-                     // The settings view now uses the same form as onboarding
-                    content += renderOnboarding();
+                    content += renderSettingsForm(); 
                 }
                 content += '</main>';
             } else if (state.currentView === 'ONBOARDING') {
-                content = renderOnboarding();
+                content = renderSettingsForm(); 
             } else {
                 // Fallback for an unknown view state
                 content = `<div class="flex flex-col items-center justify-center flex-grow p-8 text-red-400">
@@ -963,7 +1058,7 @@
                 const appDiv = document.getElementById('app');
                 if (appDiv) {
                     // Display a human-readable error if the script crashes during init
-                    appDiv.innerHTML = `<div class="p-8 text-center text-red-500">
+                    appDiv.innerHTML = `<div class="flex flex-col items-center justify-center flex-grow p-8 text-red-500">
                         <h2 class="text-2xl font-bold">App Startup Failed!</h2>
                         <p class="mt-2">A critical error occurred while starting the application. Please check the browser console for specific details (F12 or Cmd+Option+J).</p>
                     </div>`;
@@ -974,5 +1069,4 @@
     </script>
 </body>
 </html>
-
 
