@@ -3,373 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Builder Bot - Roblox Studio AI Plugin</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Custom Tailwind Configuration for deep blue theme and glassmorphism -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary-accent': '#3B82F6', // Blue 500
-                        'primary-bg': '#0F172A',    // Slate 900 (Deep Dark Blue)
-                        'secondary-bg': 'rgba(30, 41, 59, 0.8)', // Slate 800 with transparency
-                        'text-light': '#F1F5F9',    // Slate 100
-                        'text-muted': '#94A3B8',    // Slate 400
-                        'logo-blue': '#00BFFF', // A bright cyan-blue like the robot
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Studio Assistant | AI for Roblox</title>
     <style>
-        /* Custom styles for background and glassmorphism */
+        :root {
+            /* Deep Black and Navy Palette */
+            --bg-dark: #050507;
+            --navy-deep: #0a192f;
+            --electric-blue: #00d2ff;
+            --glass-fill: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
         body {
-            background-color: #0F172A; 
-            color: #F1F5F9;
+            margin: 0;
+            padding: 0;
             font-family: 'Inter', sans-serif;
-            scroll-behavior: smooth;
-        }
-
-        /* Glassmorphism Effect Class */
-        .glass {
-            background-color: rgba(30, 41, 59, 0.5); /* Semi-transparent dark background */
-            backdrop-filter: blur(10px) saturate(180%);
-            -webkit-backdrop-filter: blur(10px) saturate(180%);
-            border: 1px solid rgba(59, 130, 246, 0.3); /* Accent border */
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Style for the main CTA button - Blue Glow */
-        .cta-button {
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-        }
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.7);
-            background-color: #2563EB; /* Slightly darker blue on hover */
-        }
-
-        /* Styling for the play button overlay */
-        .play-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            overflow-x: hidden;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s;
+            min-height: 100vh;
         }
-        .video-thumbnail:hover .play-overlay {
-            background-color: rgba(0, 0, 0, 0.6);
+
+        /* Ambient Blue Glows */
+        .ambient-glow {
+            position: fixed;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.07) 0%, rgba(5, 5, 7, 0) 70%);
+            filter: blur(120px);
+            z-index: -1;
         }
-        .play-icon {
-            fill: white;
-            opacity: 0.9;
-            width: 60px;
-            height: 60px;
-            transition: transform 0.3s;
+        .top-left { top: -20%; left: -10%; }
+        .bottom-right { bottom: -20%; right: -10%; }
+
+        /* Navigation */
+        nav {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .video-thumbnail:hover .play-icon {
-            transform: scale(1.1);
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to bottom, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 100px;
+            padding: 40px;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .glass-panel {
+            background: var(--glass-fill);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 0 0 20px 0;
+            line-height: 1.1;
+        }
+
+        .accent-text {
+            color: var(--electric-blue);
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        }
+
+        p {
+            font-size: 1.25rem;
+            color: #8892b0;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* The Clean White Button */
+        .btn-white {
+            background: #ffffff;
+            color: #000000;
+            padding: 18px 45px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-white:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+            background: #f0f0f0;
+        }
+
+        .parcel-tag {
+            display: block;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <!-- Header & Navigation -->
-    <header class="p-4 md:p-6 glass sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <!-- Logo area using the actual uploaded image -->
-            <a href="#" class="flex items-center space-x-2">
-                <img src="1000115372.png" alt="Builder Bot Logo" class="logo-img rounded-full w-8 h-8">
-                <span class="text-2xl font-extrabold text-text-light tracking-tighter">Builder Bot</span>
-            </a>
-            <nav class="hidden md:flex space-x-6 text-text-light">
-                <a href="#how-it-works" class="hover:text-primary-accent transition duration-200">How It Works</a>
-                <a href="#features" class="hover:text-primary-accent transition duration-200">Features</a>
-                <a href="#demo" class="hover:text-primary-accent transition duration-200">Demo</a>
-                <a href="#faq" class="hover:text-primary-accent transition duration-200">FAQ</a>
-                <a href="#pricing" class="hover:text-primary-accent transition duration-200">Pricing</a>
-            </nav>
-            <!-- Direct link to purchase page -->
-            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="md:hidden bg-primary-accent text-text-light px-4 py-2 rounded-lg font-bold hover:bg-blue-600 transition duration-200 shadow-md">
-                Buy $4.99
-            </a>
-        </div>
-    </header>
+    <div class="ambient-glow top-left"></div>
+    <div class="ambient-glow bottom-right"></div>
 
-    <!-- Hero Section -->
-    <section class="py-16 md:py-24 text-center max-w-4xl mx-auto px-4">
-        <span class="text-sm font-semibold text-primary-accent glass px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-md">
-            The Ultimate Roblox Studio AI Plugin
-        </span>
-        <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 text-text-light">
-            Builder Bot: Your <span class="text-primary-accent">AI Co-Developer</span>.
-        </h1>
-        <p class="text-xl text-text-muted mb-8 max-w-2xl mx-auto">
-            Instantly generate clean Lua code, debug tricky issues, and prototype your game ideas faster than ever before, right inside Roblox Studio.
-        </p>
-        <!-- Direct link to purchase page -->
-        <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button bg-primary-accent text-text-light text-xl font-bold py-3 px-10 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
-            Get Builder Bot - $4.99 One-Time
-        </a>
-        <p class="text-text-muted text-sm mt-4">Lifetime license with <span class="font-bold">4+ years of guaranteed updates</span>.</p>
-    </section>
+    <nav>
+        <div class="logo">STUDIO ASSISTANT</div>
+    </nav>
 
-    <!-- How It Works Section (Vertical line removed) -->
-    <section id="how-it-works" class="py-16 md:py-20">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">How Builder Bot Speeds Up Your Workflow</h2>
-            <p class="text-lg text-text-muted mb-12 max-w-2xl mx-auto">
-                Go from idea to functional code in three simple steps.
-            </p>
-
-            <div class="flex flex-col md:flex-row justify-center md:space-x-8 space-y-8 md:space-y-0">
-                <!-- Step 1 -->
-                <div class="flex flex-col items-center">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-accent text-text-light text-xl font-bold mb-4 shadow-xl">1</div>
-                    <div class="glass p-6 rounded-xl w-full max-w-sm">
-                        <h3 class="text-xl font-semibold mb-2">Prompt the Bot</h3>
-                        <p class="text-text-muted">Type your request in plain English into the Builder Bot window inside Roblox Studio (e.g., "Make a script that opens a door when a player touches it").</p>
-                    </div>
-                </div>
-                
-                <!-- Step 2 -->
-                <div class="flex flex-col items-center">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-accent text-text-light text-xl font-bold mb-4 shadow-xl">2</div>
-                    <div class="glass p-6 rounded-xl w-full max-w-sm">
-                        <h3 class="text-xl font-semibold mb-2">Review and Insert</h3>
-                        <p class="text-text-muted">Builder Bot instantly generates clean, commented Lua code. Review the output, make minor tweaks if needed, and click 'Insert'.</p>
-                    </div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="flex flex-col items-center">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-accent text-text-light text-xl font-bold mb-4 shadow-xl">3</div>
-                    <div class="glass p-6 rounded-xl w-full max-w-sm">
-                        <h3 class="text-xl font-semibold mb-2">Publish and Play</h3>
-                        <p class="text-text-muted">Your game systems are now functional! Focus on design and gameplay while Builder Bot handles the heavy scripting.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="py-16 md:py-20 bg-secondary-bg">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Developers Are Loving Builder Bot</h2>
-            <p class="text-lg text-text-muted mb-12 max-w-2xl mx-auto">
-                The fastest way to eliminate scripting bottlenecks.
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Testimonial 1 -->
-                <div class="p-6 rounded-xl glass text-left">
-                    <p class="text-xl italic mb-4 text-text-light">"This cut my development time in half. Debugging is painless now!"</p>
-                    <p class="text-primary-accent font-semibold">— Experienced Scripter</p>
-                    <p class="text-sm text-text-muted">Roblox Developer</p>
-                </div>
-                <!-- Testimonial 2 -->
-                <div class="p-6 rounded-xl glass text-left">
-                    <p class="text-xl italic mb-4 text-text-light">"I'm not a Lua expert, but Builder Bot lets me create complex mechanics instantly. Worth every penny."</p>
-                    <p class="text-primary-accent font-semibold">— Aspiring Creator</p>
-                    <p class="text-sm text-text-muted">Roblox Creator</p>
-                </div>
-                <!-- Testimonial 3 -->
-                <div class="p-6 rounded-xl glass text-left">
-                    <p class="text-xl italic mb-4 text-text-light">"The 4-year update guarantee is the best part. Confident in my purchase for the long term."</p>
-                    <p class="text-primary-accent font-semibold">— Lead Programmer</p>
-                    <p class="text-sm text-text-muted">Independent Game Dev</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Discord Link Section -->
-    <section class="py-16 md:py-20">
-        <div class="max-w-3xl mx-auto px-4 text-center glass p-8 rounded-2xl">
-            <h2 class="text-3xl font-bold mb-4">Join the Builder Bot Community!</h2>
-            <p class="text-lg text-text-muted mb-8">
-                Get instant support, share your creations, and talk directly to the developers.
-            </p>
-            <a href="https://discord.gg/yydzPUDMBX" target="_blank" class="cta-button bg-primary-accent text-text-light text-xl font-bold py-3 px-10 rounded-xl hover:bg-blue-600 transition duration-300 inline-flex items-center space-x-2">
-                <!-- Discord Icon SVG -->
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.001 4.908c-3.774 0-7.234 1.77-9.619 4.811c-.085.114-.087.26-.005.378c.843 1.258 1.94 2.378 3.235 3.393c.311.246.65.466.994.673c-.046.068-.088.139-.126.213c-.886 1.767-1.42 3.657-1.493 5.611c-.004.108.056.213.155.253c.1.041.214.004.283-.086c.307-.398.665-.775 1.055-1.127c.48.291.996.536 1.536.726c.074.026.15.039.226.039c.07 0 .139-.012.206-.033c2.518.777 5.254.777 7.772 0c.067.02.136.033.206.033c.077 0 .152-.013.226-.039c.54-.19 1.056-.435 1.535-.726c.39.351.748.729 1.055 1.127c.069.09.183.127.283.086c.099-.04.159-.145.155-.253c-.073-1.954-.607-3.844-1.493-5.611c-.038-.074-.08-.145-.126-.213c.344-.207.683-.427.994-.673c1.295-1.015 2.392-2.135 3.235-3.393c.082-.118.08-.264-.005-.378c-2.384-3.04-5.844-4.811-9.619-4.811zm-3.018 7.37c-.779 0-1.409.63-1.409 1.409s.63 1.409 1.409 1.409s1.409-.63 1.409-1.409s-.63-1.409-1.409-1.409zm6.036 0c-.779 0-1.409.63-1.409 1.409s.63 1.409 1.409 1.409s1.409-.63 1.409-1.409s-.63-1.409-1.409-1.409z"/></svg>
-                <span>Join Discord for Support</span>
-            </a>
-        </div>
-    </section>
-
-    <!-- Video Demo Section -->
-    <section id="demo" class="py-16 md:py-20 bg-secondary-bg">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">See Builder Bot in Action</h2>
-            <p class="text-lg text-text-muted mb-8 max-w-2xl mx-auto">
-                Click the image below to watch the official demo of the <span class="font-semibold">Car Spawn System</span> being created!
-            </p>
+    <section class="hero">
+        <div class="glass-panel">
+            <h1>Your Roblox <span class="accent-text">AI Co-Pilot.</span></h1>
+            <p>Master Luau scripting and environment design with Studio Assistant. The most powerful AI plugin ever built for Roblox Studio.</p>
             
-            <div class="mx-auto w-full max-w-4xl glass p-4">
-                <!-- YouTube Thumbnail Link Replacement to avoid error 153 -->
-                <a href="https://youtu.be/t4lywaYf4b4?si=ar3p5xLPupOrnATM" target="_blank" class="block relative rounded-xl overflow-hidden shadow-2xl video-thumbnail">
-                    <!-- YouTube high-quality thumbnail (mqdefault is a good standard size) -->
-                    <img 
-                        src="https://img.youtube.com/vi/t4lywaYf4b4/hqdefault.jpg" 
-                        alt="Builder Bot Car Spawn System Demo" 
-                        class="w-full h-auto object-cover" 
-                        onerror="this.onerror=null; this.src='https://placehold.co/1280x720/1E293B/94A3B8?text=BUILDER+BOT+DEMO';" 
-                    />
-                    <!-- Play Button Overlay -->
-                    <div class="play-overlay">
-                        <svg class="play-icon" viewBox="0 0 24 24">
-                            <path d="M6 3L18 12L6 21V3Z" stroke-width="2" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                </a>
-            </div>
+            <a href="#" class="btn-white">Purchase License</a>
+            <span class="parcel-tag">Secure checkout via Parcel</span>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-16 md:py-20">
-        <div class="max-w-7xl mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Key Capabilities</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature 1: Code Generation -->
-                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                        <h3 class="text-xl font-semibold text-text-light">Instant Lua Scripting</h3>
-                    </div>
-                    <p class="text-text-muted">Turn simple English commands into clean, efficient Lua code in seconds. Write entire systems, like car spawners, with ease.</p>
-                </div>
-
-                <!-- Feature 2: Debugging -->
-                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <h3 class="text-xl font-semibold text-text-light">Smart Error Fixer</h3>
-                    </div>
-                    <p class="text-text-muted">Analyze errors in your scripts and get immediate, context-aware suggestions and fixes directly in the Studio console.</p>
-                </div>
-
-                <!-- Feature 3: Asset Suggestion (Cloud Icon) -->
-                <div class="p-6 rounded-xl glass transition duration-300 hover:border-primary-accent/80 hover:shadow-primary-accent/40">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <svg class="w-8 h-8 text-primary-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.976v0A5.002 5.002 0 009 5.002h1a5.002 5.002 0 004.855 4.854L17.7 13.3"></path></svg>
-                        <h3 class="text-xl font-semibold text-text-light">Contextual Modeling</h3>
-                    </div>
-                    <p class="text-text-muted">Suggests relevant, high-quality models and assets from the Creator Marketplace based on your current project.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- FAQ Section -->
-    <section id="faq" class="py-16 md:py-20 bg-secondary-bg">
-        <div class="max-w-4xl mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-
-            <div class="space-y-4">
-                <!-- FAQ Item 1 -->
-                <div class="glass p-5 rounded-xl transition duration-300">
-                    <h3 class="text-lg font-semibold text-text-light mb-2">How do I install Builder Bot?</h3>
-                    <p class="text-text-muted">After purchasing on the Roblox Creator Store, the plugin will automatically install in your Roblox Studio toolbox. Restart Studio if you don't see it immediately.</p>
-                </div>
-                <!-- FAQ Item 2 -->
-                <div class="glass p-5 rounded-xl transition duration-300">
-                    <h3 class="text-lg font-semibold text-text-light mb-2">What languages does the AI support?</h3>
-                    <p class="text-text-muted">Builder Bot is primarily trained on Lua, but it can understand requests made in plain English and most major programming languages.</p>
-                </div>
-                <!-- FAQ Item 3 -->
-                <div class="glass p-5 rounded-xl transition duration-300">
-                    <h3 class="text-lg font-semibold text-text-light mb-2">Is this a subscription or a one-time purchase?</h3>
-                    <p class="text-text-muted">It is a <span class="font-semibold">one-time purchase</span> of $4.99, which grants you a lifetime license and includes the guarantee of 4+ years of future updates and support.</p>
-                </div>
-                <!-- FAQ Item 4 -->
-                <div class="glass p-5 rounded-xl transition duration-300">
-                    <h3 class="text-lg font-semibold text-text-light mb-2">What if I need help or have a bug?</h3>
-                    <p class="text-text-muted">We offer dedicated support! Join our Discord community (link above) where developers and staff can help you instantly.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-16 md:py-20 max-w-3xl mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold mb-4">Get the Builder Bot Advantage Today</h2>
-        <p class="text-xl text-text-muted mb-12">An incredible value: one payment, years of use.</p>
-
-        <!-- Pricing Card -->
-        <div class="glass p-8 rounded-2xl border-4 border-primary-accent/50 w-full">
-            <p class="text-sm font-semibold uppercase text-primary-accent mb-2">LIFETIME DEVELOPER LICENSE</p>
-            <div class="flex items-end justify-center mb-6">
-                <span class="text-5xl font-extrabold text-text-light">$4</span>
-                <span class="text-2xl font-bold text-text-light">.99</span>
-                <span class="text-xl text-text-muted ml-2">/ one-time</span>
-            </div>
-            <p class="text-text-muted mb-8">Includes all current features, unlimited use, and prioritized support.</p>
-
-            <ul class="text-left space-y-3 text-text-light mb-10">
-                <li class="flex items-center">
-                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    Unlimited AI Code & Debugging
-                </li>
-                <li class="flex items-center font-bold text-primary-accent">
-                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    4+ Years of Guaranteed Feature Updates
-                </li>
-                <li class="flex items-center">
-                    <svg class="w-5 h-5 text-primary-accent mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    Direct Access to Developer Community
-                </li>
-            </ul>
-
-            <!-- Direct link to purchase page -->
-            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="cta-button w-full bg-primary-accent text-text-light text-xl font-bold py-4 rounded-xl hover:bg-blue-600 transition duration-300 inline-block">
-                Buy Builder Bot on Roblox Creator Store
-            </a>
-            <p class="text-text-muted text-sm mt-3">
-                Purchase is secure and processed through the Roblox platform.
-            </p>
-            <p class="text-sm font-semibold text-green-400 mt-2">
-                Satisfaction Guaranteed: Risk-free purchase!
-            </p>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="glass mt-16 py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-sm text-text-muted">&copy; 2025 Builder Bot Developers. The Builder Bot plugin is an independent developer tool and is not officially affiliated with Roblox Corporation.</p>
-            <div class="flex justify-center space-x-6 mt-4 text-text-muted text-sm">
-                <a href="#" class="hover:text-primary-accent">Support</a>
-                <a href="#" class="hover:text-primary-accent">Terms of Service</a>
-                <a href="#" class="hover:text-primary-accent">Privacy Policy</a>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Simple smooth scrolling for internal links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
 </body>
 </html>
