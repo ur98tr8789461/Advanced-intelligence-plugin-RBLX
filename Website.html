@@ -3,140 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Assistant | Premium AI</title>
+    <title>Studio Assistant | Elite AI</title>
     <style>
         :root {
-            --bg: #020204;
+            --bg: #020205;
+            --navy: #050a18;
             --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.3);
             --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(212, 175, 55, 0.2);
+            --border: rgba(212, 175, 55, 0.15);
         }
 
         body {
             background-color: var(--bg);
             color: #fff;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
-            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-
-        /* Gold Ambient Blur */
-        .gold-glow {
-            position: fixed;
-            width: 60vw; height: 60vw;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.07) 0%, transparent 70%);
-            filter: blur(120px); z-index: -1;
-            top: 10%; left: 20%;
+        /* Ambient Glows */
+        .ambient {
+            position: fixed; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(10, 25, 47, 0.4) 0%, transparent 70%);
+            filter: blur(100px); z-index: -1;
         }
 
-        /* Hero */
-        .hero { text-align: center; padding: 80px 0; animation: fadeIn 1.5s ease; }
-        h1 { font-size: 4rem; margin: 0; }
-        .gold-text { color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-        /* Installation Section */
-        .install-box {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px;
-            margin: 50px 0;
-        }
-
-        .step { display: flex; align-items: flex-start; margin-bottom: 30px; }
-        .step-num { 
-            background: var(--gold); color: #000; 
-            width: 35px; height: 35px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; margin-right: 20px; flex-shrink: 0;
-        }
-
-        /* Reviews Table Style */
-        .review-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .review-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 25px;
-            border-radius: 18px;
-        }
-
+        /* Hero Section */
+        .hero { text-align: center; padding: 120px 0 60px; }
+        .hero h1 { font-size: 4.5rem; margin: 0; font-weight: 900; letter-spacing: -2px; }
+        .gold-text { color: var(--gold); text-shadow: 0 0 25px var(--gold-glow); }
+        
+        /* The White Button */
         .btn-white {
             background: #fff; color: #000;
-            padding: 18px 45px; border-radius: 12px;
-            text-decoration: none; font-weight: 800;
-            display: inline-block; border: 2px solid var(--gold);
+            padding: 20px 50px; border-radius: 15px;
+            text-decoration: none; font-weight: 800; font-size: 1.1rem;
+            display: inline-block; margin-top: 30px;
+            border: 2px solid var(--gold);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+        .btn-white:hover { transform: scale(1.05); box-shadow: 0 0 40px var(--gold); background: #f0f0f0; }
+
+        /* Features Section */
+        .section-title { text-align: center; color: var(--gold); margin-top: 80px; font-size: 2rem; }
+        
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; margin-top: 40px;
+        }
+        .f-card {
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid var(--border); padding: 35px; border-radius: 25px;
             transition: 0.3s;
         }
+        .f-card:hover { border-color: var(--gold); transform: translateY(-10px); }
+        .f-card h3 { color: var(--gold); margin-top: 0; }
 
-        .btn-white:hover { box-shadow: 0 0 30px var(--gold); transform: translateY(-3px); }
+        /* Install Steps */
+        .install-box {
+            background: linear-gradient(to bottom right, var(--navy), var(--bg));
+            border: 1px solid var(--border); border-radius: 30px;
+            padding: 50px; margin-top: 40px;
+        }
+        .step { display: flex; align-items: flex-start; margin-bottom: 25px; }
+        .step-n { background: var(--gold); color: #000; width: 30px; height: 30px; 
+                  border-radius: 50%; display: flex; align-items: center; 
+                  justify-content: center; font-weight: bold; margin-right: 20px; flex-shrink: 0; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Review Section */
+        #review-list {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px; margin: 40px 0 100px;
+        }
+        .r-card { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .hero-floating { animation: float 6s ease-in-out infinite; }
     </style>
 </head>
 <body>
 
-    <div class="gold-glow"></div>
+    <div class="ambient" style="top: -10%; left: -10%;"></div>
+    <div class="ambient" style="bottom: -10%; right: -10%; background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);"></div>
 
     <div class="container">
-        <section class="hero">
+        <section class="hero hero-floating">
             <h1>Studio <span class="gold-text">Assistant</span></h1>
-            <p>Elevate your workflow with specialized AI models.</p>
-            <a href="YOUR_PARCEL_LINK_HERE" class="btn-white">PURCHASE NOW</a>
+            <p style="font-size: 1.3rem; opacity: 0.7; max-width: 600px; margin: 20px auto;">The premium AI workflow for Roblox Studio. Speed, complexity, and understanding—all in one plugin.</p>
+            <a href="https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2F6941ecd03de84cc66e0dcc82" class="btn-white">PURCHASE NOW</a>
         </section>
 
-        <h2 style="text-align: center; color: var(--gold);">How to Install</h2>
-        <div class="install-box">
-            <div class="step">
-                <div class="step-num">1</div>
-                <div>
-                    <strong>Download</strong>
-                    <p>Purchase via Parcel and download the .rbxm plugin file.</p>
-                </div>
+        <h2 class="section-title">Core Capabilities</h2>
+        <div class="features-grid">
+            <div class="f-card">
+                <h3>⚡ Dual-Engine AI</h3>
+                <p>Features a <b>Turbo Model</b> for lightning-fast snippets and a <b>Pro Model</b> for heavy logic and complex math.</p>
             </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <div>
-                    <strong>Import & Config</strong>
-                    <p>Drag the file into Roblox Studio. Open the <b>Module</b> folder and adjust your settings before saving.</p>
-                </div>
+            <div class="f-card">
+                <h3>📜 Luau Executor</h3>
+                <p>Instantly transform natural language prompts into high-performance, Roblox-ready Luau scripts.</p>
             </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <div>
-                    <strong>Save</strong>
-                    <p>Right-click the folder and select "Save as Local Plugin" to activate.</p>
-                </div>
+            <div class="f-card">
+                <h3>🔍 Script Summary</h3>
+                <p>Never get lost in old code again. Get a full breakdown of any script's logic in seconds.</p>
             </div>
         </div>
 
-        <h2 style="text-align: center; color: var(--gold);">User Feedback</h2>
-        <div id="review-container" class="review-grid"></div>
+        <h2 class="section-title">How to Install</h2>
+        <div class="install-box">
+            <div class="step">
+                <div class="step-n">1</div>
+                <div><strong>Download:</strong> Purchase via the link above and download your .rbxm file.</div>
+            </div>
+            <div class="step">
+                <div class="step-n">2</div>
+                <div><strong>Import:</strong> Drag the file into Roblox Studio. Open the <b>Module Folder</b> inside.</div>
+            </div>
+            <div class="step">
+                <div class="step-n">3</div>
+                <div><strong>Configure:</strong> Edit the settings in the Module folder to match your workflow.</div>
+            </div>
+            <div class="step">
+                <div class="step-n">4</div>
+                <div><strong>Save:</strong> Right-click the folder and select "Save as Local Plugin."</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Developer Feedback</h2>
+        <div id="review-list"></div>
     </div>
 
     <script>
         // CONFIG TABLE FOR REVIEWS
-        const reviewsConfig = [
-            { name: "Dev_X", msg: "The complex model is perfect for math-heavy scripts.", stars: 5 },
-            { name: "BuilderPro", msg: "Summarization makes reading old code so much easier.", stars: 5 },
-            { name: "Scripty", msg: "Super fast AI. Best purchase this year.", stars: 4 }
+        const reviews = [
+            { user: "Dev_Rick", text: "The dual-engine setup is a game changer. Pro model is smart.", stars: 5 },
+            { user: "BloxVibes", text: "Finally an AI that actually understands Luau optimizations.", stars: 5 },
+            { user: "ScriptMaster", text: "Summarization saved me hours on a 2021 project.", stars: 5 }
         ];
 
-        const container = document.getElementById('review-container');
-        reviewsConfig.forEach(r => {
-            container.innerHTML += `
-                <div class="review-card">
+        const list = document.getElementById('review-list');
+        reviews.forEach(r => {
+            list.innerHTML += `
+                <div class="r-card">
                     <div style="color: var(--gold); margin-bottom: 10px;">${"★".repeat(r.stars)}</div>
-                    <p style="margin: 0; opacity: 0.8;">"${r.msg}"</p>
-                    <div style="margin-top: 15px; font-size: 0.8rem; font-weight: bold; color: var(--gold);">- ${r.name}</div>
+                    <p style="font-style: italic; opacity: 0.8;">"${r.text}"</p>
+                    <div style="margin-top: 15px; font-size: 0.8rem; color: var(--gold);">@${r.user}</div>
                 </div>
             `;
         });
