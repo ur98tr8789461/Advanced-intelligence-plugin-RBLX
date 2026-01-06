@@ -77,138 +77,11 @@
       background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
       transition: all 0.3s ease;
       box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-button::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-
-    .cta-button:active::before {
-      width: 300px;
-      height: 300px;
     }
 
     .cta-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 30px rgba(96, 165, 250, 0.5);
-    }
-
-    /* Payment Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .payment-modal {
-      background: rgba(10, 10, 10, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 24px;
-      padding: 32px 20px;
-      max-width: 360px;
-      width: 80%;
-      max-height: 90%;
-      overflow-y: auto;
-      position: relative;
-      transform: scale(0.9) translateY(20px);
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    @media (min-width: 768px) {
-      .payment-modal {
-        padding: 48px;
-      }
-    }
-
-    .modal-overlay.active .payment-modal {
-      transform: scale(1) translateY(0);
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 32px;
-      height: 32px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .close-modal:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: rotate(90deg);
-    }
-
-    .payment-option {
-      background: rgba(255, 255, 255, 0.03);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .payment-option::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .payment-option:hover::before {
-      left: 100%;
-    }
-
-    .payment-option:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(96, 165, 250, 0.4);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(96, 165, 250, 0.2);
-    }
-
-    .payment-option:active {
-      transform: translateY(-2px) scale(0.98);
     }
 
     /* Social link */
@@ -281,39 +154,7 @@
  <body class="h-full">
   <div class="main-wrapper gradient-bg"><!-- Accent glow effects -->
    <div class="accent-glow" style="top: -200px; left: -100px;"></div>
-   <div class="accent-glow" style="bottom: -200px; right: -100px;"></div><!-- Payment Modal -->
-   <div id="paymentModal" class="modal-overlay">
-    <div class="payment-modal"><button class="close-modal" id="closeModal">
-      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg></button>
-     <h3 class="text-3xl font-bold text-white mb-3 text-center">Choose Payment Method</h3>
-     <p class="text-gray-400 text-center mb-8">Select your preferred way to purchase</p>
-     <div class="space-y-4"><!-- Real World Currency Option -->
-      <div class="payment-option" id="currencyPayment">
-       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center flex-shrink-0">
-         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-         </svg>
-        </div>
-        <div>
-         <h4 class="text-xl font-semibold text-white mb-1">Real World Currency</h4>
-         <p class="text-gray-400 text-sm">Pay with card, PayPal, or other methods</p>
-        </div>
-       </div>
-      </div><!-- Robux Option -->
-      <div class="payment-option" id="robuxPayment">
-       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 p-2"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Roblox_Logo.svg/2048px-Roblox_Logo.svg.png" alt="Roblox" class="w-full h-full object-contain" onerror="this.style.display='none';">
-        </div>
-        <div>
-         <h4 class="text-xl font-semibold text-white mb-1">Robux</h4>
-         <p class="text-gray-400 text-sm">Pay using your Roblox currency</p>
-        </div>
-       </div>
-      </div>
-     </div>
-    </div>
-   </div><!-- Content -->
+   <div class="accent-glow" style="bottom: -200px; right: -100px;"></div><!-- Content -->
    <div class="relative min-h-full"><!-- Header -->
     <header class="border-b border-white border-opacity-10">
      <div class="max-w-7xl mx-auto px-8 py-6">
@@ -327,7 +168,7 @@
          <h1 id="product-name" class="text-xl font-semibold text-white">Developer Intelligence</h1>
          <p class="text-sm text-gray-400">by SolarGlyph Labs</p>
         </div>
-       </div><button class="cta-trigger px-6 py-2.5 rounded-full bg-white bg-opacity-5 text-white text-sm font-medium border border-white border-opacity-10 hover:bg-opacity-10 transition-all"> <span id="cta-header">Buy Now</span> </button>
+       </div><button id="cta-header" class="px-6 py-2.5 rounded-full bg-white bg-opacity-5 text-white text-sm font-medium border border-white border-opacity-10 hover:bg-opacity-10 transition-all"> Get Started </button>
       </div>
      </div>
     </header><!-- Hero Section -->
@@ -336,7 +177,7 @@
       <div class="inline-block mb-6"><span class="px-4 py-2 rounded-full text-sm text-blue-400 font-medium bg-blue-400 bg-opacity-10 border border-blue-400 border-opacity-20"> AI-Powered Roblox Studio Plugin </span>
       </div>
       <h2 id="tagline" class="hero-title text-6xl md:text-7xl text-white mb-6">AI-Powered Development</h2>
-      <p id="hero-description" class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation</p><button class="cta-button cta-trigger px-8 py-4 rounded-full text-white font-semibold text-lg"> <span id="cta-main">Buy Now</span> </button>
+      <p id="hero-description" class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation</p><button id="cta-main" class="cta-button px-8 py-4 rounded-full text-white font-semibold text-lg"> Get Started Free </button>
      </div>
     </section><!-- Features Grid -->
     <section class="max-w-7xl mx-auto px-8 py-20">
@@ -400,7 +241,34 @@
     </section><!-- Reviews Section -->
     <section class="max-w-7xl mx-auto px-8 py-20">
      <h3 class="section-title text-4xl text-white text-center mb-16">What Developers Say</h3>
-     <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- Reviews will be generated by JavaScript -->
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- Review 1 -->
+      <div class="review-card rounded-2xl p-8">
+       <div class="flex items-center gap-1 mb-4" id="review-one-stars"><!-- Stars will be generated by JS -->
+       </div>
+       <p id="review-one-text" class="text-gray-300 leading-relaxed mb-6">This plugin has completely transformed my workflow. The AI suggestions are incredibly accurate and save me hours every day!</p>
+       <div class="border-t border-white border-opacity-10 pt-4">
+        <p id="review-one-name" class="text-white font-semibold">Alex Rivera</p>
+        <p id="review-one-role" class="text-gray-400 text-sm">Senior Game Developer</p>
+       </div>
+      </div><!-- Review 2 -->
+      <div class="review-card rounded-2xl p-8">
+       <div class="flex items-center gap-1 mb-4" id="review-two-stars"><!-- Stars will be generated by JS -->
+       </div>
+       <p id="review-two-text" class="text-gray-300 leading-relaxed mb-6">The instant debugging feature alone is worth it. No more spending hours hunting for errors!</p>
+       <div class="border-t border-white border-opacity-10 pt-4">
+        <p id="review-two-name" class="text-white font-semibold">Sarah Chen</p>
+        <p id="review-two-role" class="text-gray-400 text-sm">Roblox Script Developer</p>
+       </div>
+      </div><!-- Review 3 -->
+      <div class="review-card rounded-2xl p-8">
+       <div class="flex items-center gap-1 mb-4" id="review-three-stars"><!-- Stars will be generated by JS -->
+       </div>
+       <p id="review-three-text" class="text-gray-300 leading-relaxed mb-6">Amazing tool for both beginners and experienced developers. The code generation feature is mind-blowing!</p>
+       <div class="border-t border-white border-opacity-10 pt-4">
+        <p id="review-three-name" class="text-white font-semibold">Marcus Webb</p>
+        <p id="review-three-role" class="text-gray-400 text-sm">Studio Creator</p>
+       </div>
+      </div>
      </div>
     </section><!-- Installation Instructions -->
     <section class="max-w-7xl mx-auto px-8 py-20">
@@ -451,7 +319,7 @@
     <section class="max-w-7xl mx-auto px-8 py-20">
      <div class="glass-subtle rounded-3xl p-16 text-center border border-white border-opacity-10">
       <h3 class="section-title text-4xl text-white mb-4">Ready to supercharge your workflow?</h3>
-      <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">Join thousands of developers building better games faster</p><button class="cta-button cta-trigger px-8 py-4 rounded-full text-white font-semibold text-lg"> <span id="cta-footer">Buy Now</span> </button>
+      <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">Join thousands of developers building better games faster</p><button id="cta-footer" class="cta-button px-8 py-4 rounded-full text-white font-semibold text-lg"> Install Plugin Now </button>
      </div>
     </section><!-- Footer -->
     <footer class="border-t border-white border-opacity-10 mt-20">
@@ -462,29 +330,6 @@
    </div>
   </div>
   <script>
-    // Easy-to-edit reviews array - just add more objects to add reviews!
-    const reviews = [
-      {
-        name: "Alex Rivera",
-        role: "Senior Game Developer",
-        rating: 5,
-        text: "This plugin has completely transformed my workflow. The AI suggestions are incredibly accurate and save me hours every day!"
-      },
-      {
-        name: "Sarah Chen",
-        role: "Roblox Script Developer",
-        rating: 5,
-        text: "The instant debugging feature alone is worth it. No more spending hours hunting for errors!"
-      },
-      {
-        name: "Marcus Webb",
-        role: "Studio Creator",
-        rating: 3,
-        text: "Amazing tool for both beginners and experienced developers. The code generation feature is mind-blowing!"
-      }
-      // Add more reviews here by copying the pattern above!
-    ];
-
     const defaultConfig = {
       background_color: "#000000",
       surface_color: "#0a0a0a",
@@ -496,7 +341,7 @@
       product_name: "Developer Intelligence",
       tagline: "AI-Powered Development",
       hero_description: "Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation",
-      cta_button_text: "Buy Now",
+      cta_button_text: "Get Started Free",
       feature_one_title: "Smart Code Completion",
       feature_one_description: "AI-powered suggestions as you type, understanding context and your coding style",
       feature_two_title: "Instant Debugging",
@@ -504,103 +349,39 @@
       feature_three_title: "Code Generation",
       feature_three_description: "Generate complex scripts instantly from natural language descriptions",
       installation_count: "1000+",
-      currency_payment_url: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2F6941ecd03de84cc66e0dcc82",
-      robux_payment_url: "https://www.roblox.com/join/vznn7",
+      review_one_name: "Alex Rivera",
+      review_one_role: "Senior Game Developer",
+      review_one_rating: "5",
+      review_one_text: "This plugin has completely transformed my workflow. The AI suggestions are incredibly accurate and save me hours every day!",
+      review_two_name: "Sarah Chen",
+      review_two_role: "Roblox Script Developer",
+      review_two_rating: "5",
+      review_two_text: "The instant debugging feature alone is worth it. No more spending hours hunting for errors!",
+      review_three_name: "Marcus Webb",
+      review_three_role: "Studio Creator",
+      review_three_rating: "4",
+      review_three_text: "Amazing tool for both beginners and experienced developers. The code generation feature is mind-blowing!",
       youtube_url: "https://www.youtube.com/channel/UCamDTpvyYaS7_46p6fESChw",
       footer_text: "© 2024 SolarGlyph Labs. All rights reserved."
     };
 
-    // Modal functionality
-    const modal = document.getElementById('paymentModal');
-    const closeBtn = document.getElementById('closeModal');
-    const ctaTriggers = document.querySelectorAll('.cta-trigger');
-    const currencyPayment = document.getElementById('currencyPayment');
-    const robuxPayment = document.getElementById('robuxPayment');
-
-    // Open modal
-    ctaTriggers.forEach(trigger => {
-      trigger.addEventListener('click', () => {
-        modal.classList.add('active');
-      });
-    });
-
-    // Close modal
-    closeBtn.addEventListener('click', () => {
-      modal.classList.remove('active');
-    });
-
-    // Close modal when clicking outside
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('active');
-      }
-    });
-
-    // Payment options
-    currencyPayment.addEventListener('click', () => {
-      const url = window.elementSdk ? (window.elementSdk.config.currency_payment_url || defaultConfig.currency_payment_url) : defaultConfig.currency_payment_url;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    });
-
-    robuxPayment.addEventListener('click', () => {
-      const url = window.elementSdk ? (window.elementSdk.config.robux_payment_url || defaultConfig.robux_payment_url) : defaultConfig.robux_payment_url;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    });
-
-    function createStarElement(filled) {
-      const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      star.setAttribute("class", filled ? "w-5 h-5 star" : "w-5 h-5 star-empty");
-      star.setAttribute("fill", "currentColor");
-      star.setAttribute("viewBox", "0 0 20 20");
-      
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z");
-      
-      star.appendChild(path);
-      return star;
-    }
-
-    function renderReviews() {
-      const container = document.getElementById('reviews-container');
+    function generateStars(rating, containerId) {
+      const container = document.getElementById(containerId);
       container.innerHTML = '';
+      const numRating = parseInt(rating) || 0;
       
-      reviews.forEach((review) => {
-        const reviewCard = document.createElement('div');
-        reviewCard.className = 'review-card rounded-2xl p-8';
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        star.setAttribute("class", i <= numRating ? "w-5 h-5 star" : "w-5 h-5 star-empty");
+        star.setAttribute("fill", "currentColor");
+        star.setAttribute("viewBox", "0 0 20 20");
         
-        // Stars container
-        const starsContainer = document.createElement('div');
-        starsContainer.className = 'flex items-center gap-1 mb-4';
-        for (let i = 1; i <= 5; i++) {
-          starsContainer.appendChild(createStarElement(i <= review.rating));
-        }
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z");
         
-        // Review text
-        const reviewText = document.createElement('p');
-        reviewText.className = 'text-gray-300 leading-relaxed mb-6';
-        reviewText.textContent = review.text;
-        
-        // Author info
-        const authorSection = document.createElement('div');
-        authorSection.className = 'border-t border-white border-opacity-10 pt-4';
-        
-        const authorName = document.createElement('p');
-        authorName.className = 'text-white font-semibold';
-        authorName.textContent = review.name;
-        
-        const authorRole = document.createElement('p');
-        authorRole.className = 'text-gray-400 text-sm';
-        authorRole.textContent = review.role;
-        
-        authorSection.appendChild(authorName);
-        authorSection.appendChild(authorRole);
-        
-        reviewCard.appendChild(starsContainer);
-        reviewCard.appendChild(reviewText);
-        reviewCard.appendChild(authorSection);
-        
-        container.appendChild(reviewCard);
-      });
+        star.appendChild(path);
+        container.appendChild(star);
+      }
     }
 
     async function onConfigChange(config) {
@@ -622,11 +403,9 @@
       document.getElementById('product-name').textContent = config.product_name || defaultConfig.product_name;
       document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
       document.getElementById('hero-description').textContent = config.hero_description || defaultConfig.hero_description;
-      
-      const ctaText = config.cta_button_text || defaultConfig.cta_button_text;
-      document.getElementById('cta-header').textContent = ctaText;
-      document.getElementById('cta-main').textContent = ctaText;
-      document.getElementById('cta-footer').textContent = ctaText;
+      document.getElementById('cta-header').textContent = config.cta_button_text || defaultConfig.cta_button_text;
+      document.getElementById('cta-main').textContent = config.cta_button_text || defaultConfig.cta_button_text;
+      document.getElementById('cta-footer').textContent = config.cta_button_text || defaultConfig.cta_button_text;
       
       document.getElementById('feature-one-title').textContent = config.feature_one_title || defaultConfig.feature_one_title;
       document.getElementById('feature-one-description').textContent = config.feature_one_description || defaultConfig.feature_one_description;
@@ -638,6 +417,22 @@
       // Installation count
       const installCount = config.installation_count || defaultConfig.installation_count;
       document.getElementById('installation-count').innerHTML = `${installCount}<span class="text-blue-400">+</span>`;
+
+      // Reviews
+      document.getElementById('review-one-name').textContent = config.review_one_name || defaultConfig.review_one_name;
+      document.getElementById('review-one-role').textContent = config.review_one_role || defaultConfig.review_one_role;
+      document.getElementById('review-one-text').textContent = config.review_one_text || defaultConfig.review_one_text;
+      generateStars(config.review_one_rating || defaultConfig.review_one_rating, 'review-one-stars');
+
+      document.getElementById('review-two-name').textContent = config.review_two_name || defaultConfig.review_two_name;
+      document.getElementById('review-two-role').textContent = config.review_two_role || defaultConfig.review_two_role;
+      document.getElementById('review-two-text').textContent = config.review_two_text || defaultConfig.review_two_text;
+      generateStars(config.review_two_rating || defaultConfig.review_two_rating, 'review-two-stars');
+
+      document.getElementById('review-three-name').textContent = config.review_three_name || defaultConfig.review_three_name;
+      document.getElementById('review-three-role').textContent = config.review_three_role || defaultConfig.review_three_role;
+      document.getElementById('review-three-text').textContent = config.review_three_text || defaultConfig.review_three_text;
+      generateStars(config.review_three_rating || defaultConfig.review_three_rating, 'review-three-stars');
 
       // YouTube link
       document.getElementById('youtube-link').href = config.youtube_url || defaultConfig.youtube_url;
@@ -726,15 +521,22 @@
         ["feature_three_title", config.feature_three_title || defaultConfig.feature_three_title],
         ["feature_three_description", config.feature_three_description || defaultConfig.feature_three_description],
         ["installation_count", config.installation_count || defaultConfig.installation_count],
-        ["currency_payment_url", config.currency_payment_url || defaultConfig.currency_payment_url],
-        ["robux_payment_url", config.robux_payment_url || defaultConfig.robux_payment_url],
+        ["review_one_name", config.review_one_name || defaultConfig.review_one_name],
+        ["review_one_role", config.review_one_role || defaultConfig.review_one_role],
+        ["review_one_rating", config.review_one_rating || defaultConfig.review_one_rating],
+        ["review_one_text", config.review_one_text || defaultConfig.review_one_text],
+        ["review_two_name", config.review_two_name || defaultConfig.review_two_name],
+        ["review_two_role", config.review_two_role || defaultConfig.review_two_role],
+        ["review_two_rating", config.review_two_rating || defaultConfig.review_two_rating],
+        ["review_two_text", config.review_two_text || defaultConfig.review_two_text],
+        ["review_three_name", config.review_three_name || defaultConfig.review_three_name],
+        ["review_three_role", config.review_three_role || defaultConfig.review_three_role],
+        ["review_three_rating", config.review_three_rating || defaultConfig.review_three_rating],
+        ["review_three_text", config.review_three_text || defaultConfig.review_three_text],
         ["youtube_url", config.youtube_url || defaultConfig.youtube_url],
         ["footer_text", config.footer_text || defaultConfig.footer_text]
       ]);
     }
-
-    // Render reviews on page load
-    renderReviews();
 
     // Initialize the SDK
     if (window.elementSdk) {
@@ -746,5 +548,5 @@
       });
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b9a326833486914',t:'MTc2NzY5MTgyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b9a4f3f85e76f0a',t:'MTc2NzY5MzAxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
