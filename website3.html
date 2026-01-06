@@ -1,173 +1,625 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Invoice Editor</title>
-<style>
-  body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-  h2 { margin-bottom: 20px; }
-  .invoice-field { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 400px; }
-  .invoice-table { border-collapse: collapse; width: 100%; max-width: 600px; margin-top: 20px; }
-  .invoice-table th, .invoice-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-  .invoice-table th { background-color: #eee; }
-  #preview { border: 1px solid #ccc; padding: 10px; margin-top: 20px; background: #fff; max-width: 600px; }
-  .add-item { margin-top: 10px; padding: 5px 10px; cursor: pointer; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+            color: #f1f1f1;
+            overflow: hidden;
+        }
+        .gradient-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #0a0a0a, #333333, #0a0a0a, #222222);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            z-index: -1;
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-modal {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .input-glow:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .loading-gradient {
+            background: linear-gradient(90deg, #4b5563, #374151, #4b5563);
+            background-size: 200% 200%;
+            animation: loading-gradient-animation 2s ease infinite;
+        }
+        @keyframes loading-gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
 </head>
-<body>
+<body class="overflow-hidden">
+    <!-- Dynamic Gradient Background -->
+    <div class="gradient-background"></div>
 
-<h2>Invoice Editor</h2>
+    <!-- Main Container -->
+    <div id="main-container" class="flex h-screen w-full relative p-4 lg:p-8 flex-col">
 
-<label>Invoice Title:</label>
-<input id="invoiceTitle" class="invoice-field" placeholder="Invoice Title">
+        <!-- Sidebar (Chat Management) -->
+        <div id="sidebar" class="glass-modal w-80 p-4 lg:p-6 flex flex-col transition-all duration-300 transform -translate-x-full absolute top-4 left-4 lg:translate-x-0 lg:relative lg:top-0 lg:left-0 z-50 lg:z-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Chats</h2>
+                <button onclick="toggleSidebar()" class="lg:hidden text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <button onclick="newChat()" class="w-full bg-white bg-opacity-10 py-2 px-4 rounded-full mb-4 hover:bg-opacity-20 transition-colors duration-200">
+                + New Chat
+            </button>
+            <ul id="chat-list" class="flex-grow overflow-y-auto pr-2">
+                <!-- Chat items will be dynamically added here -->
+            </ul>
+            <div class="mt-auto pt-4 border-t border-gray-700">
+                <h3 class="text-lg font-semibold mb-2">Save/Load</h3>
+                <div class="space-y-2">
+                    <button id="export-btn" class="w-full py-2 px-4 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors duration-200">
+                        Export Chats
+                    </button>
+                    <input type="file" id="import-file" class="hidden" accept=".json">
+                    <button onclick="document.getElementById('import-file').click()" class="w-full py-2 px-4 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors duration-200">
+                        Import Chats
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Chat and Input Area -->
+        <div id="main-chat-area" class="flex-grow flex flex-col justify-end items-center transition-all duration-500 ease-in-out min-h-0">
+            <!-- Sidebar toggle for mobile -->
+            <button onclick="toggleSidebar()" class="lg:hidden fixed top-6 left-6 z-50 bg-white bg-opacity-10 p-2 rounded-full hover:bg-opacity-20 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
 
-<label>Client Name:</label>
-<input id="clientName" class="invoice-field" placeholder="Client Name">
+            <!-- API Key & Name Display -->
+            <div id="auth-info" class="flex-shrink-0 mb-4 text-center text-xs text-white opacity-50">
+                <span id="welcome-message"></span>
+                <button onclick="showWelcomeModal()" class="underline ml-1">Change</button>
+            </div>
+            
+            <div id="chat-title" class="text-xl font-bold mb-4 text-center">New Chat</div>
 
-<label>Invoice Items:</label>
-<table id="itemsTable" class="invoice-table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Quantity</th>
-      <th>Price</th>
-      <th>Total</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="itemsBody">
-    <!-- Items added dynamically -->
-  </tbody>
-</table>
-<button id="addItemBtn" class="add-item">Add Item</button>
+            <!-- Chat Container -->
+            <div id="chat-container" class="w-full max-w-4xl overflow-y-auto p-4 lg:p-8 flex-grow mb-4 flex flex-col-reverse min-h-0">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <!-- Input Area -->
+            <div id="input-container" class="w-full max-w-4xl p-4 glass-modal rounded-full flex items-center mb-8 z-10 transition-all duration-500 ease-in-out flex-shrink-0">
+                <input type="text" id="user-input" placeholder="Type a message..." class="flex-grow px-4 py-2 bg-transparent text-white placeholder-gray-400 focus:outline-none">
+                <button onclick="sendMessage()" class="bg-white bg-opacity-20 p-2 rounded-full ml-4 hover:bg-opacity-30 transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-<div id="preview">
-  <h3 id="previewTitle">Title: </h3>
-  <p id="previewClient">Client: </p>
-  <h4>Items:</h4>
-  <table id="previewItems" class="invoice-table">
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Qty</th>
-        <th>Price</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Preview items -->
-    </tbody>
-  </table>
-  <h4 id="previewTotal">Total: 0</h4>
-</div>
+    </div>
 
-<script>
-  // Debounce helper
-  function debounce(func, delay) {
-    let timeout;
-    return function(...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
+    <!-- Pop-up Modal Container -->
+    <div id="modals-container" class="fixed inset-0 flex justify-center items-center p-4 z-50 hidden">
+        <!-- Overlay with Backdrop Blur -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md hidden" onclick="toggleSidebar()"></div>
 
-  const invoiceTitle = document.getElementById('invoiceTitle');
-  const clientName = document.getElementById('clientName');
-  const itemsBody = document.getElementById('itemsBody');
-  const addItemBtn = document.getElementById('addItemBtn');
-  const previewTitle = document.getElementById('previewTitle');
-  const previewClient = document.getElementById('previewClient');
-  const previewItems = document.querySelector('#previewItems tbody');
-  const previewTotal = document.getElementById('previewTotal');
+        <!-- Welcome/Config Modal -->
+        <div id="welcome-modal" class="glass-modal p-8 max-w-sm w-full space-y-4 hidden z-50">
+            <h2 class="text-2xl font-bold text-center">Welcome!</h2>
+            <p class="text-sm text-center opacity-70">Please enter your name and API key to begin. This information will be stored securely in your browser.</p>
+            <div id="error-message" class="text-red-400 text-sm text-center hidden">
+                Please enter both a name and a valid API key.
+            </div>
+            <div>
+                <label for="name-input" class="block text-sm font-medium mb-1">Your Name</label>
+                <input type="text" id="name-input" class="w-full p-3 rounded-md bg-gray-800 text-white placeholder-gray-500 input-glow" placeholder="Your Name">
+            </div>
+            <div>
+                <label for="api-key-input" class="block text-sm font-medium mb-1">Gemini API Key</label>
+                <input type="password" id="api-key-input" class="w-full p-3 rounded-md bg-gray-800 text-white placeholder-gray-500 input-glow" placeholder="Your API Key">
+            </div>
+            <div>
+                <label for="instructions-input" class="block text-sm font-medium mb-1">Custom AI Instructions (Optional)</label>
+                <textarea id="instructions-input" class="w-full p-3 rounded-md bg-gray-800 text-white placeholder-gray-500 input-glow resize-none" rows="3" placeholder="e.g., You are a friendly, helpful assistant named Gemini."></textarea>
+            </div>
+            <button onclick="saveAndDismissWelcomeModal()" class="w-full py-3 rounded-md bg-white text-black font-semibold hover:bg-gray-200 transition-colors duration-200">Save & Start Chatting</button>
+        </div>
 
-  let items = JSON.parse(localStorage.getItem('invoiceItems')) || [];
+        <!-- Custom Confirmation Modal -->
+        <div id="confirmation-modal" class="glass-modal p-6 max-w-xs w-full space-y-4 hidden z-50">
+            <p id="confirm-message" class="text-center"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirm-no" class="px-4 py-2 rounded-full bg-gray-600 hover:bg-gray-500 transition-colors">No</button>
+                <button id="confirm-yes" class="px-4 py-2 rounded-full bg-red-600 hover:bg-red-500 transition-colors">Yes</button>
+            </div>
+        </div>
+    </div>
 
-  function updatePreview() {
-    previewTitle.textContent = `Title: ${invoiceTitle.value}`;
-    previewClient.textContent = `Client: ${clientName.value}`;
+    <script>
+        // Global state management
+        let currentChatId = null;
+        let chats = {};
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
+        
+        // DOM elements
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const chatList = document.getElementById('chat-list');
+        const modalsContainer = document.getElementById('modals-container');
+        const welcomeModal = document.getElementById('welcome-modal');
+        const welcomeMessageEl = document.getElementById('welcome-message');
+        const sidebar = document.getElementById('sidebar');
+        const inputContainer = document.getElementById('input-container');
+        const nameInput = document.getElementById('name-input');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const instructionsInput = document.getElementById('instructions-input');
+        const errorMessageEl = document.getElementById('error-message');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmMessageEl = document.getElementById('confirm-message');
+        const confirmYesBtn = document.getElementById('confirm-yes');
+        const confirmNoBtn = document.getElementById('confirm-no');
+        const chatTitleEl = document.getElementById('chat-title');
+        const mainChatArea = document.getElementById('main-chat-area');
+        const backdrop = document.querySelector('.backdrop-blur-md');
 
-    // Clear preview items
-    previewItems.innerHTML = '';
-    let total = 0;
-    items.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.qty}</td>
-        <td>${item.price}</td>
-        <td>${(item.qty * item.price).toFixed(2)}</td>
-      `;
-      previewItems.appendChild(tr);
-      total += item.qty * item.price;
-    });
-    previewTotal.textContent = `Total: ${total.toFixed(2)}`;
-  }
+        // --- Data Management (using localStorage) ---
+        function saveData() {
+            localStorage.setItem('chat_data', JSON.stringify(chats));
+        }
 
-  function saveItems() {
-    localStorage.setItem('invoiceItems', JSON.stringify(items));
-  }
+        function loadData() {
+            const data = localStorage.getItem('chat_data');
+            if (data) {
+                chats = JSON.parse(data);
+                currentChatId = Object.keys(chats)[0] || null;
+            } else {
+                chats = {};
+                currentChatId = null;
+            }
+        }
+        
+        function setLocalStorage(name, value) {
+            localStorage.setItem(name, value);
+        }
 
-  function renderItems() {
-    itemsBody.innerHTML = '';
-    items.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="text" value="${item.name}" data-index="${index}" class="itemName"></td>
-        <td><input type="number" value="${item.qty}" data-index="${index}" class="itemQty" min="0"></td>
-        <td><input type="number" value="${item.price}" data-index="${index}" class="itemPrice" min="0" step="0.01"></td>
-        <td>${(item.qty * item.price).toFixed(2)}</td>
-        <td><button data-index="${index}" class="deleteItem">Delete</button></td>
-      `;
-      itemsBody.appendChild(tr);
-    });
-    updatePreview();
-  }
+        function getLocalStorage(name) {
+            return localStorage.getItem(name);
+        }
 
-  // Event delegation for item changes
-  itemsBody.addEventListener('input', debounce(function(e) {
-    const target = e.target;
-    const index = target.dataset.index;
-    if (target.classList.contains('itemName')) items[index].name = target.value;
-    if (target.classList.contains('itemQty')) items[index].qty = parseFloat(target.value) || 0;
-    if (target.classList.contains('itemPrice')) items[index].price = parseFloat(target.value) || 0;
-    saveItems();
-    renderItems();
-  }, 200));
+        // --- UI & Modal Functions ---
+        function showWelcomeModal() {
+            modalsContainer.classList.remove('hidden');
+            welcomeModal.classList.remove('hidden');
+            nameInput.value = getLocalStorage('user_name') || '';
+            apiKeyInput.value = getLocalStorage('api_key') || '';
+            instructionsInput.value = getLocalStorage('instructions') || '';
+            errorMessageEl.classList.add('hidden');
+        }
 
-  // Delete item
-  itemsBody.addEventListener('click', function(e) {
-    if (e.target.classList.contains('deleteItem')) {
-      const index = e.target.dataset.index;
-      items.splice(index, 1);
-      saveItems();
-      renderItems();
-    }
-  });
+        function saveAndDismissWelcomeModal() {
+            const name = nameInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            const instructions = instructionsInput.value.trim();
+            
+            if (!name || !apiKey) {
+                errorMessageEl.classList.remove('hidden');
+                return;
+            }
 
-  // Add new item
-  addItemBtn.addEventListener('click', () => {
-    items.push({name:'', qty:0, price:0});
-    saveItems();
-    renderItems();
-  });
+            setLocalStorage('user_name', name);
+            setLocalStorage('api_key', apiKey);
+            setLocalStorage('instructions', instructions);
+            updateWelcomeMessage();
+            modalsContainer.classList.add('hidden');
+            welcomeModal.classList.add('hidden');
+        }
 
-  // Save title & client
-  invoiceTitle.addEventListener('input', debounce(() => {
-    localStorage.setItem('invoiceTitle', invoiceTitle.value);
-    updatePreview();
-  }, 300));
+        function showConfirmationModal(message, onConfirm) {
+            confirmMessageEl.textContent = message;
+            modalsContainer.classList.remove('hidden');
+            confirmationModal.classList.remove('hidden');
+            
+            const handleYes = () => {
+                onConfirm();
+                hideConfirmationModal();
+            };
+            const handleNo = () => {
+                hideConfirmationModal();
+            };
+            
+            confirmYesBtn.onclick = handleYes;
+            confirmNoBtn.onclick = handleNo;
+        }
+        
+        function hideConfirmationModal() {
+            modalsContainer.classList.add('hidden');
+            confirmationModal.classList.add('hidden');
+        }
 
-  clientName.addEventListener('input', debounce(() => {
-    localStorage.setItem('clientName', clientName.value);
-    updatePreview();
-  }, 300));
+        function updateWelcomeMessage() {
+            const name = getLocalStorage('user_name');
+            const hasApiKey = getLocalStorage('api_key');
+            welcomeMessageEl.innerHTML = `
+                <span class="font-semibold">${name ? `Welcome, ${name}!` : 'Welcome!'}</span>
+                <span class="ml-2 text-gray-400">API Key: ${hasApiKey ? 'Set' : 'Not Set'}</span>
+            `;
+        }
 
-  // Load saved title & client
-  invoiceTitle.value = localStorage.getItem('invoiceTitle') || '';
-  clientName.value = localStorage.getItem('clientName') || '';
-  renderItems();
-</script>
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+        
+        function getOrCreateChatId() {
+            if (!currentChatId || !chats[currentChatId]) {
+                const chatIds = Object.keys(chats);
+                if (chatIds.length > 0) {
+                    currentChatId = chatIds[0];
+                } else {
+                    const newId = Date.now().toString();
+                    chats[newId] = [];
+                    currentChatId = newId;
+                    saveData();
+                }
+            }
+            return currentChatId;
+        }
 
+        // --- Chat Management ---
+        function newChat() {
+            const newId = Date.now().toString();
+            chats[newId] = [];
+            currentChatId = newId;
+            saveData();
+            renderChatList();
+            renderMessages();
+            updateChatTitle();
+        }
+
+        function switchChat(chatId) {
+            currentChatId = chatId;
+            renderChatList();
+            renderMessages();
+            saveData();
+            updateChatTitle();
+            if (window.innerWidth < 1024) { // Hide sidebar on mobile after switching
+                toggleSidebar();
+            }
+        }
+
+        function deleteChat(chatId) {
+            showConfirmationModal("Are you sure you want to delete this chat?", () => {
+                delete chats[chatId];
+                if (Object.keys(chats).length === 0) {
+                     newChat();
+                } else if (currentChatId === chatId) {
+                    currentChatId = Object.keys(chats)[0];
+                }
+                saveData();
+                renderChatList();
+                renderMessages();
+                updateChatTitle();
+            });
+        }
+
+        function renderChatList() {
+            chatList.innerHTML = '';
+            const chatIds = Object.keys(chats).sort((a, b) => b - a);
+            
+            if (chatIds.length === 0) {
+                newChat();
+                return;
+            }
+            getOrCreateChatId();
+
+            chatIds.forEach(id => {
+                const chat = chats[id];
+                const title = chat.title ? chat.title : 'New Chat';
+                const isActive = id === currentChatId;
+
+                const li = document.createElement('li');
+                li.className = `p-3 rounded-lg mb-2 cursor-pointer flex justify-between items-center transition-colors duration-200 ${isActive ? 'bg-white bg-opacity-20' : 'hover:bg-white hover:bg-opacity-10'}`;
+                li.onclick = () => switchChat(id);
+                li.innerHTML = `
+                    <span class="truncate pr-2">${title}</span>
+                    <button onclick="event.stopPropagation(); deleteChat('${id}')" class="text-gray-400 hover:text-red-400 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                `;
+                chatList.appendChild(li);
+            });
+        }
+        
+        function updateChatTitle() {
+            const currentChat = chats[currentChatId];
+            if (currentChat && currentChat.title) {
+                chatTitleEl.textContent = currentChat.title;
+            } else {
+                chatTitleEl.textContent = 'New Chat';
+            }
+        }
+
+        function renderMessages() {
+            chatContainer.innerHTML = '';
+            const messages = chats[currentChatId] || [];
+            messages.forEach(msg => {
+                const messageEl = document.createElement('div');
+                const isUser = msg.role === 'user';
+                const messageClass = isUser ? 'self-end bg-white bg-opacity-10' : 'self-start bg-black bg-opacity-20';
+                messageEl.className = `p-4 my-2 rounded-xl glass-modal max-w-lg fade-in-up ${messageClass}`;
+                
+                const title = isUser ? 'You' : 'AI';
+                messageEl.innerHTML = `
+                    <p class="text-sm font-bold opacity-70 mb-1">${title}</p>
+                    <p class="text-base">${msg.content}</p>
+                `;
+                chatContainer.insertBefore(messageEl, chatContainer.firstChild);
+            });
+            // Automatically scroll to the bottom of the chat container
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // --- Core Chat Logic ---
+        async function summarizeChat(chatId) {
+            if (!getLocalStorage('api_key') || chats[chatId].title) return;
+            
+            const chatHistoryForApi = chats[chatId].slice(0, 2).map(msg => ({
+                role: msg.role === 'ai' ? 'model' : msg.role,
+                parts: [{ text: msg.content }]
+            }));
+
+            // Set placeholder title
+            chats[chatId].title = 'Generating Title...';
+            saveData();
+            updateChatTitle();
+            renderChatList();
+            
+            const payload = {
+                contents: chatHistoryForApi,
+                systemInstruction: { parts: [{ text: 'Generate a concise and descriptive title for the following conversation, no more than 50 characters long. The title should summarize the main topic.' }] },
+            };
+
+            const url = new URL(API_URL);
+            url.searchParams.append('key', getLocalStorage('api_key'));
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                
+                if (!response.ok) {
+                     const errorText = await response.text();
+                     throw new Error(`Summary API call failed: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                let summary = result?.candidates?.[0]?.content?.parts?.[0]?.text.trim() || 'New Chat';
+                
+                // Enforce the 50-character limit
+                if (summary.length > 50) {
+                    summary = summary.substring(0, 47) + '...';
+                }
+
+                chats[chatId].title = summary;
+                saveData();
+                renderChatList();
+                updateChatTitle();
+
+            } catch (error) {
+                console.error('Error summarizing chat:', error);
+                const errorMessage = { role: 'ai', content: `[Title Generation Error]: ${error.message}` };
+                chats[chatId].push(errorMessage);
+                chats[chatId].title = 'New Chat'; // Fallback on error
+                saveData();
+                renderMessages();
+                renderChatList();
+                updateChatTitle();
+            }
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message || !currentChatId) return;
+            
+            const apiKey = getLocalStorage('api_key');
+
+            if (!apiKey) {
+                const errorMessage = { role: 'ai', content: `Please enter your API key to send messages. Click "Change" above to set it.` };
+                chats[currentChatId].push(errorMessage);
+                saveData();
+                renderMessages();
+                return;
+            }
+
+            const isFirstMessage = chats[currentChatId].length === 0;
+
+            chats[currentChatId].push({ role: 'user', content: message });
+            saveData();
+            renderMessages();
+            userInput.value = '';
+            
+            inputContainer.classList.add('loading-gradient');
+
+            try {
+                const chatHistoryForApi = chats[currentChatId].map(msg => ({
+                    role: msg.role === 'ai' ? 'model' : msg.role,
+                    parts: [{ text: msg.content }]
+                }));
+
+                const userName = getLocalStorage('user_name') || 'user';
+                const instructions = getLocalStorage('instructions');
+                const systemPrompt = instructions ? instructions : `You are a friendly AI assistant. Be helpful and concise. Address the user by their name: ${userName}.`;
+
+                const payload = {
+                    contents: chatHistoryForApi,
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                const url = new URL(API_URL);
+                url.searchParams.append('key', apiKey);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API call failed: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                const aiResponseText = result?.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI.";
+                
+                chats[currentChatId].push({ role: 'ai', content: aiResponseText });
+                saveData();
+                renderMessages();
+
+                if (isFirstMessage) {
+                    summarizeChat(currentChatId);
+                }
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                const errorMessage = { role: 'ai', content: `Error: Could not get a response. Please check your API key or try again. Details: ${error.message}` };
+                chats[currentChatId].push(errorMessage);
+                saveData();
+                renderMessages();
+            } finally {
+                inputContainer.classList.remove('loading-gradient');
+            }
+        }
+
+        // Add event listener for Enter key
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // --- Input Focus/Blur Animation ---
+        userInput.addEventListener('focus', () => {
+            mainChatArea.classList.remove('justify-end');
+            mainChatArea.classList.add('justify-center');
+            inputContainer.classList.add('scale-105', 'shadow-lg');
+        });
+
+        userInput.addEventListener('blur', () => {
+            mainChatArea.classList.remove('justify-center');
+            mainChatArea.classList.add('justify-end');
+            inputContainer.classList.remove('scale-105', 'shadow-lg');
+        });
+
+
+        // --- Export/Import Logic ---
+        document.getElementById('export-btn').addEventListener('click', () => {
+            const dataStr = JSON.stringify(chats, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai-chats.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('import-file').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedChats = JSON.parse(e.target.result);
+                    if (typeof importedChats === 'object' && importedChats !== null) {
+                        showConfirmationModal("Importing this file will overwrite any existing chats with the same IDs. Do you want to continue?", () => {
+                           chats = { ...chats, ...importedChats };
+                           saveData();
+                           renderChatList();
+                           renderMessages();
+                        });
+                    } else {
+                         showConfirmationModal('Invalid JSON file. Please import a valid chat export file.', () => {});
+                    }
+                } catch (error) {
+                    showConfirmationModal('Error parsing JSON file. Please ensure the file is valid.', () => {});
+                    console.error('Import error:', error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // --- Initial App Load ---
+        function init() {
+            loadData();
+            renderChatList();
+            renderMessages();
+            updateWelcomeMessage();
+            updateChatTitle();
+            
+            if (!getLocalStorage('user_name') || !getLocalStorage('api_key')) {
+                showWelcomeModal();
+            }
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
+
+
