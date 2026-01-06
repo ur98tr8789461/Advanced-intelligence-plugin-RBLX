@@ -77,11 +77,130 @@
       background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
       transition: all 0.3s ease;
       box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .cta-button:active::before {
+      width: 300px;
+      height: 300px;
     }
 
     .cta-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 30px rgba(96, 165, 250, 0.5);
+    }
+
+    /* Payment Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .payment-modal {
+      background: rgba(10, 10, 10, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-overlay.active .payment-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(90deg);
+    }
+
+    .payment-option {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .payment-option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .payment-option:hover::before {
+      left: 100%;
+    }
+
+    .payment-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(96, 165, 250, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(96, 165, 250, 0.2);
+    }
+
+    .payment-option:active {
+      transform: translateY(-2px) scale(0.98);
     }
 
     /* Social link */
@@ -154,7 +273,39 @@
  <body class="h-full">
   <div class="main-wrapper gradient-bg"><!-- Accent glow effects -->
    <div class="accent-glow" style="top: -200px; left: -100px;"></div>
-   <div class="accent-glow" style="bottom: -200px; right: -100px;"></div><!-- Content -->
+   <div class="accent-glow" style="bottom: -200px; right: -100px;"></div><!-- Payment Modal -->
+   <div id="paymentModal" class="modal-overlay">
+    <div class="payment-modal"><button class="close-modal" id="closeModal">
+      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg></button>
+     <h3 class="text-3xl font-bold text-white mb-3 text-center">Choose Payment Method</h3>
+     <p class="text-gray-400 text-center mb-8">Select your preferred way to purchase</p>
+     <div class="space-y-4"><!-- Real World Currency Option -->
+      <div class="payment-option" id="currencyPayment">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center flex-shrink-0">
+         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg>
+        </div>
+        <div>
+         <h4 class="text-xl font-semibold text-white mb-1">Real World Currency</h4>
+         <p class="text-gray-400 text-sm">Pay with card, PayPal, or other methods</p>
+        </div>
+       </div>
+      </div><!-- Robux Option -->
+      <div class="payment-option" id="robuxPayment">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 p-2"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Roblox_Logo.svg/2048px-Roblox_Logo.svg.png" alt="Roblox" class="w-full h-full object-contain" onerror="this.style.display='none';">
+        </div>
+        <div>
+         <h4 class="text-xl font-semibold text-white mb-1">Robux</h4>
+         <p class="text-gray-400 text-sm">Pay using your Roblox currency</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- Content -->
    <div class="relative min-h-full"><!-- Header -->
     <header class="border-b border-white border-opacity-10">
      <div class="max-w-7xl mx-auto px-8 py-6">
@@ -168,7 +319,7 @@
          <h1 id="product-name" class="text-xl font-semibold text-white">Developer Intelligence</h1>
          <p class="text-sm text-gray-400">by SolarGlyph Labs</p>
         </div>
-       </div><button id="cta-header" class="px-6 py-2.5 rounded-full bg-white bg-opacity-5 text-white text-sm font-medium border border-white border-opacity-10 hover:bg-opacity-10 transition-all"> Get Started </button>
+       </div><button class="cta-trigger px-6 py-2.5 rounded-full bg-white bg-opacity-5 text-white text-sm font-medium border border-white border-opacity-10 hover:bg-opacity-10 transition-all"> <span id="cta-header">Buy Now</span> </button>
       </div>
      </div>
     </header><!-- Hero Section -->
@@ -177,7 +328,7 @@
       <div class="inline-block mb-6"><span class="px-4 py-2 rounded-full text-sm text-blue-400 font-medium bg-blue-400 bg-opacity-10 border border-blue-400 border-opacity-20"> AI-Powered Roblox Studio Plugin </span>
       </div>
       <h2 id="tagline" class="hero-title text-6xl md:text-7xl text-white mb-6">AI-Powered Development</h2>
-      <p id="hero-description" class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation</p><button id="cta-main" class="cta-button px-8 py-4 rounded-full text-white font-semibold text-lg"> Get Started Free </button>
+      <p id="hero-description" class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation</p><button class="cta-button cta-trigger px-8 py-4 rounded-full text-white font-semibold text-lg"> <span id="cta-main">Buy Now</span> </button>
      </div>
     </section><!-- Features Grid -->
     <section class="max-w-7xl mx-auto px-8 py-20">
@@ -319,7 +470,7 @@
     <section class="max-w-7xl mx-auto px-8 py-20">
      <div class="glass-subtle rounded-3xl p-16 text-center border border-white border-opacity-10">
       <h3 class="section-title text-4xl text-white mb-4">Ready to supercharge your workflow?</h3>
-      <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">Join thousands of developers building better games faster</p><button id="cta-footer" class="cta-button px-8 py-4 rounded-full text-white font-semibold text-lg"> Install Plugin Now </button>
+      <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">Join thousands of developers building better games faster</p><button class="cta-button cta-trigger px-8 py-4 rounded-full text-white font-semibold text-lg"> <span id="cta-footer">Buy Now</span> </button>
      </div>
     </section><!-- Footer -->
     <footer class="border-t border-white border-opacity-10 mt-20">
@@ -341,7 +492,7 @@
       product_name: "Developer Intelligence",
       tagline: "AI-Powered Development",
       hero_description: "Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation",
-      cta_button_text: "Get Started Free",
+      cta_button_text: "Buy Now",
       feature_one_title: "Smart Code Completion",
       feature_one_description: "AI-powered suggestions as you type, understanding context and your coding style",
       feature_two_title: "Instant Debugging",
@@ -361,9 +512,48 @@
       review_three_role: "Studio Creator",
       review_three_rating: "4",
       review_three_text: "Amazing tool for both beginners and experienced developers. The code generation feature is mind-blowing!",
+      currency_payment_url: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2F6941ecd03de84cc66e0dcc82",
+      robux_payment_url: "https://www.roblox.com/join/vznn7",
       youtube_url: "https://www.youtube.com/channel/UCamDTpvyYaS7_46p6fESChw",
       footer_text: "© 2024 SolarGlyph Labs. All rights reserved."
     };
+
+    // Modal functionality
+    const modal = document.getElementById('paymentModal');
+    const closeBtn = document.getElementById('closeModal');
+    const ctaTriggers = document.querySelectorAll('.cta-trigger');
+    const currencyPayment = document.getElementById('currencyPayment');
+    const robuxPayment = document.getElementById('robuxPayment');
+
+    // Open modal
+    ctaTriggers.forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        modal.classList.add('active');
+      });
+    });
+
+    // Close modal
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+
+    // Payment options
+    currencyPayment.addEventListener('click', () => {
+      const url = window.elementSdk ? (window.elementSdk.config.currency_payment_url || defaultConfig.currency_payment_url) : defaultConfig.currency_payment_url;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+
+    robuxPayment.addEventListener('click', () => {
+      const url = window.elementSdk ? (window.elementSdk.config.robux_payment_url || defaultConfig.robux_payment_url) : defaultConfig.robux_payment_url;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
 
     function generateStars(rating, containerId) {
       const container = document.getElementById(containerId);
@@ -403,9 +593,11 @@
       document.getElementById('product-name').textContent = config.product_name || defaultConfig.product_name;
       document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
       document.getElementById('hero-description').textContent = config.hero_description || defaultConfig.hero_description;
-      document.getElementById('cta-header').textContent = config.cta_button_text || defaultConfig.cta_button_text;
-      document.getElementById('cta-main').textContent = config.cta_button_text || defaultConfig.cta_button_text;
-      document.getElementById('cta-footer').textContent = config.cta_button_text || defaultConfig.cta_button_text;
+      
+      const ctaText = config.cta_button_text || defaultConfig.cta_button_text;
+      document.getElementById('cta-header').textContent = ctaText;
+      document.getElementById('cta-main').textContent = ctaText;
+      document.getElementById('cta-footer').textContent = ctaText;
       
       document.getElementById('feature-one-title').textContent = config.feature_one_title || defaultConfig.feature_one_title;
       document.getElementById('feature-one-description').textContent = config.feature_one_description || defaultConfig.feature_one_description;
@@ -533,6 +725,8 @@
         ["review_three_role", config.review_three_role || defaultConfig.review_three_role],
         ["review_three_rating", config.review_three_rating || defaultConfig.review_three_rating],
         ["review_three_text", config.review_three_text || defaultConfig.review_three_text],
+        ["currency_payment_url", config.currency_payment_url || defaultConfig.currency_payment_url],
+        ["robux_payment_url", config.robux_payment_url || defaultConfig.robux_payment_url],
         ["youtube_url", config.youtube_url || defaultConfig.youtube_url],
         ["footer_text", config.footer_text || defaultConfig.footer_text]
       ]);
@@ -548,5 +742,5 @@
       });
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b4d1420637acd25',t:'MTc2Njg4MzE4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b9a0cda970e6914',t:'MTc2NzY5MDI5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
