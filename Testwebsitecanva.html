@@ -1,552 +1,194 @@
-<!doctype html>
-<html lang="en" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Developer Intelligence - SolarGlyph Labs</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      box-sizing: border-box;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solarglyph Labs | Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #ffffff;
+        }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-    }
+        body {
+            background-color: var(--bg);
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            /* Subtle dark gradient for depth */
+            background: radial-gradient(circle at top, #111 0%, #050505 100%);
+        }
 
-    .main-wrapper {
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
+        /* Navigation */
+        nav {
+            padding: 30px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+        }
 
-    /* Smooth gradient background */
-    .gradient-bg {
-      background: linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #000000 100%);
-    }
+        .brand { font-weight: 600; letter-spacing: 4px; font-size: 1.2rem; }
 
-    /* Subtle glass effect */
-    .glass-subtle {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+        /* Grid Layout */
+        .container {
+            max-width: 1200px;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+        }
 
-    /* Feature card with hover effect */
-    .feature-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+        /* Product Card & Micro-Interactions */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
 
-    .feature-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(96, 165, 250, 0.3);
-      transform: translateY(-4px);
-    }
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+        }
 
-    /* Review card */
-    .review-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s ease;
-    }
+        .img-container {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
 
-    .review-card:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.12);
-    }
+        .product-img {
+            width: 100%;
+            transition: transform 0.8s ease;
+        }
 
-    /* Star rating */
-    .star {
-      color: #60a5fa;
-    }
+        .card:hover .product-img {
+            transform: scale(1.08); /* Section 5 Zoom */
+        }
 
-    .star-empty {
-      color: rgba(255, 255, 255, 0.2);
-    }
+        /* Badge Styling */
+        .badge {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 10px; font-weight: 700;
+            background: var(--white); color: #000;
+            padding: 4px 10px; border-radius: 20px;
+            z-index: 2;
+        }
 
-    /* CTA Button with refined styling */
-    .cta-button {
-      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
-    }
+        .price-row {
+            display: flex; gap: 15px; margin: 15px 0 25px;
+            font-size: 0.9rem; opacity: 0.8;
+        }
 
-    .cta-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px rgba(96, 165, 250, 0.5);
-    }
+        /* Buttons & Shimmer Effect */
+        .btn-group { display: flex; gap: 10px; }
+        
+        .btn {
+            flex: 1; padding: 14px; border-radius: 10px;
+            text-decoration: none; text-align: center;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; transition: 0.3s;
+        }
 
-    /* Social link */
-    .social-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 28px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: white;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
+        .btn-learn { border: 1px solid var(--white); color: var(--white); }
+        .btn-learn:hover { background: rgba(255,255,255,0.1); }
 
-    .social-link:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(96, 165, 250, 0.3);
-      transform: translateY(-2px);
-    }
+        .btn-buy { 
+            background: var(--white); color: #000; 
+            position: relative; overflow: hidden;
+        }
 
-    /* Accent glow */
-    .accent-glow {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(96, 165, 250, 0.15) 0%, transparent 70%);
-      border-radius: 50%;
-      filter: blur(60px);
-      pointer-events: none;
-    }
+        /* Shimmer Animation (Section 5) */
+        .btn-buy::after {
+            content: '';
+            position: absolute; top: -50%; left: -100%;
+            width: 50%; height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: rotate(30deg);
+            transition: 0.6s;
+        }
 
-    /* Typography */
-    .hero-title {
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-    }
+        .btn-buy:hover::after { left: 150%; }
 
-    .section-title {
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
+    </style>
+</head>
+<body>
 
-    /* Stat counter animation */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+<nav>
+    <div class="brand" id="nav-brand">SOLARGLYPH LABS</div>
+</nav>
 
-    .fade-in-up {
-      animation: fadeInUp 0.6s ease-out forwards;
-    }
+<div class="container" id="shop-grid">
+    </div>
 
-    /* Smooth scrolling */
-    .main-wrapper {
-      scroll-behavior: smooth;
-    }
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full">
-  <div class="main-wrapper gradient-bg"><!-- Accent glow effects -->
-   <div class="accent-glow" style="top: -200px; left: -100px;"></div>
-   <div class="accent-glow" style="bottom: -200px; right: -100px;"></div><!-- Content -->
-   <div class="relative min-h-full"><!-- Header -->
-    <header class="border-b border-white border-opacity-10">
-     <div class="max-w-7xl mx-auto px-8 py-6">
-      <div class="flex items-center justify-between">
-       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-         </svg>
-        </div>
-        <div>
-         <h1 id="product-name" class="text-xl font-semibold text-white">Developer Intelligence</h1>
-         <p class="text-sm text-gray-400">by SolarGlyph Labs</p>
-        </div>
-       </div><button id="cta-header" class="px-6 py-2.5 rounded-full bg-white bg-opacity-5 text-white text-sm font-medium border border-white border-opacity-10 hover:bg-opacity-10 transition-all"> Get Started </button>
-      </div>
-     </div>
-    </header><!-- Hero Section -->
-    <section class="max-w-7xl mx-auto px-8 py-24 text-center">
-     <div class="max-w-4xl mx-auto">
-      <div class="inline-block mb-6"><span class="px-4 py-2 rounded-full text-sm text-blue-400 font-medium bg-blue-400 bg-opacity-10 border border-blue-400 border-opacity-20"> AI-Powered Roblox Studio Plugin </span>
-      </div>
-      <h2 id="tagline" class="hero-title text-6xl md:text-7xl text-white mb-6">AI-Powered Development</h2>
-      <p id="hero-description" class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation</p><button id="cta-main" class="cta-button px-8 py-4 rounded-full text-white font-semibold text-lg"> Get Started Free </button>
-     </div>
-    </section><!-- Features Grid -->
-    <section class="max-w-7xl mx-auto px-8 py-20">
-     <h3 class="section-title text-4xl text-white text-center mb-16">Powerful Features</h3>
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- Feature 1 -->
-      <div class="feature-card rounded-2xl p-8">
-       <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6">
-        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-       </div>
-       <h4 id="feature-one-title" class="text-2xl font-semibold text-white mb-3">Smart Code Completion</h4>
-       <p id="feature-one-description" class="text-gray-400 leading-relaxed">AI-powered suggestions as you type, understanding context and your coding style</p>
-      </div><!-- Feature 2 -->
-      <div class="feature-card rounded-2xl p-8">
-       <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6">
-        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-       </div>
-       <h4 id="feature-two-title" class="text-2xl font-semibold text-white mb-3">Instant Debugging</h4>
-       <p id="feature-two-description" class="text-gray-400 leading-relaxed">Find and fix errors in seconds with intelligent error detection and solutions</p>
-      </div><!-- Feature 3 -->
-      <div class="feature-card rounded-2xl p-8">
-       <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6">
-        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-        </svg>
-       </div>
-       <h4 id="feature-three-title" class="text-2xl font-semibold text-white mb-3">Code Generation</h4>
-       <p id="feature-three-description" class="text-gray-400 leading-relaxed">Generate complex scripts instantly from natural language descriptions</p>
-      </div>
-     </div>
-    </section><!-- Stats Section -->
-    <section class="max-w-7xl mx-auto px-8 py-20">
-     <div class="glass-subtle rounded-3xl p-12 border border-white border-opacity-10">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 text-center">
-       <div class="fade-in-up">
-        <div class="text-5xl font-bold text-white mb-2">
-         10<span class="text-blue-400">x</span>
-        </div>
-        <p class="text-gray-400">Faster Development</p>
-       </div>
-       <div class="fade-in-up" style="animation-delay: 0.1s;">
-        <div class="text-5xl font-bold text-white mb-2">
-         95<span class="text-blue-400">%</span>
-        </div>
-        <p class="text-gray-400">Fewer Bugs</p>
-       </div>
-       <div class="fade-in-up" style="animation-delay: 0.2s;">
-        <div class="text-5xl font-bold text-white mb-2">
-         1000<span class="text-blue-400">+</span>
-        </div>
-        <p class="text-gray-400">Active Developers</p>
-       </div>
-       <div class="fade-in-up" style="animation-delay: 0.3s;">
-        <div id="installation-count" class="text-5xl font-bold text-white mb-2">
-         1000<span class="text-blue-400">+</span>
-        </div>
-        <p class="text-gray-400">Total Installations</p>
-       </div>
-      </div>
-     </div>
-    </section><!-- Reviews Section -->
-    <section class="max-w-7xl mx-auto px-8 py-20">
-     <h3 class="section-title text-4xl text-white text-center mb-16">What Developers Say</h3>
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- Review 1 -->
-      <div class="review-card rounded-2xl p-8">
-       <div class="flex items-center gap-1 mb-4" id="review-one-stars"><!-- Stars will be generated by JS -->
-       </div>
-       <p id="review-one-text" class="text-gray-300 leading-relaxed mb-6">This plugin has completely transformed my workflow. The AI suggestions are incredibly accurate and save me hours every day!</p>
-       <div class="border-t border-white border-opacity-10 pt-4">
-        <p id="review-one-name" class="text-white font-semibold">Alex Rivera</p>
-        <p id="review-one-role" class="text-gray-400 text-sm">Senior Game Developer</p>
-       </div>
-      </div><!-- Review 2 -->
-      <div class="review-card rounded-2xl p-8">
-       <div class="flex items-center gap-1 mb-4" id="review-two-stars"><!-- Stars will be generated by JS -->
-       </div>
-       <p id="review-two-text" class="text-gray-300 leading-relaxed mb-6">The instant debugging feature alone is worth it. No more spending hours hunting for errors!</p>
-       <div class="border-t border-white border-opacity-10 pt-4">
-        <p id="review-two-name" class="text-white font-semibold">Sarah Chen</p>
-        <p id="review-two-role" class="text-gray-400 text-sm">Roblox Script Developer</p>
-       </div>
-      </div><!-- Review 3 -->
-      <div class="review-card rounded-2xl p-8">
-       <div class="flex items-center gap-1 mb-4" id="review-three-stars"><!-- Stars will be generated by JS -->
-       </div>
-       <p id="review-three-text" class="text-gray-300 leading-relaxed mb-6">Amazing tool for both beginners and experienced developers. The code generation feature is mind-blowing!</p>
-       <div class="border-t border-white border-opacity-10 pt-4">
-        <p id="review-three-name" class="text-white font-semibold">Marcus Webb</p>
-        <p id="review-three-role" class="text-gray-400 text-sm">Studio Creator</p>
-       </div>
-      </div>
-     </div>
-    </section><!-- Installation Instructions -->
-    <section class="max-w-7xl mx-auto px-8 py-20">
-     <h3 class="section-title text-4xl text-white text-center mb-16">How to Install</h3>
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"><!-- Step 1 -->
-      <div class="glass-subtle rounded-2xl p-8 border border-white border-opacity-10">
-       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 text-white font-bold text-xl">
-        1
-       </div>
-       <h4 class="text-xl font-semibold text-white mb-3">Get from Parcel</h4>
-       <p class="text-gray-400 leading-relaxed">Download Developer Intelligence from the Roblox Parcel marketplace</p>
-      </div><!-- Step 2 -->
-      <div class="glass-subtle rounded-2xl p-8 border border-white border-opacity-10">
-       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 text-white font-bold text-xl">
-        2
-       </div>
-       <h4 class="text-xl font-semibold text-white mb-3">Add to Studio</h4>
-       <p class="text-gray-400 leading-relaxed">Place the plugin into Roblox Studio, then right-click and select "Save as Local Plugin"</p>
-      </div><!-- Step 3 -->
-      <div class="glass-subtle rounded-2xl p-8 border border-white border-opacity-10">
-       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 text-white font-bold text-xl">
-        3
-       </div>
-       <h4 class="text-xl font-semibold text-white mb-3">Configure</h4>
-       <p class="text-gray-400 leading-relaxed">Customize settings by navigating to the Modules folder and editing the Config module</p>
-      </div>
-     </div><!-- Configuration Note -->
-     <div class="glass-subtle rounded-2xl p-6 border border-blue-400 border-opacity-20 bg-blue-400 bg-opacity-5">
-      <div class="flex items-start gap-4">
-       <div class="w-6 h-6 rounded-full bg-blue-400 bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-1">
-        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-       </div>
-       <div>
-        <h5 class="text-white font-semibold mb-1">Pro Tip</h5>
-        <p class="text-gray-400 text-sm leading-relaxed">You can change the plugin configuration anytime by going into the Modules folder and editing the settings in the Config module</p>
-       </div>
-      </div>
-     </div>
-    </section><!-- Social Media Section -->
-    <section class="max-w-7xl mx-auto px-8 py-20">
-     <div class="text-center">
-      <h3 class="section-title text-3xl text-white mb-8">Stay Connected</h3><a id="youtube-link" href="https://www.youtube.com/channel/UCamDTpvyYaS7_46p6fESChw" target="_blank" rel="noopener noreferrer" class="social-link">
-       <svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-       </svg><span class="font-medium">Watch Tutorials on YouTube</span> </a>
-     </div>
-    </section><!-- CTA Section -->
-    <section class="max-w-7xl mx-auto px-8 py-20">
-     <div class="glass-subtle rounded-3xl p-16 text-center border border-white border-opacity-10">
-      <h3 class="section-title text-4xl text-white mb-4">Ready to supercharge your workflow?</h3>
-      <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">Join thousands of developers building better games faster</p><button id="cta-footer" class="cta-button px-8 py-4 rounded-full text-white font-semibold text-lg"> Install Plugin Now </button>
-     </div>
-    </section><!-- Footer -->
-    <footer class="border-t border-white border-opacity-10 mt-20">
-     <div class="max-w-7xl mx-auto px-8 py-8 text-center">
-      <p id="footer-text" class="text-gray-500">© 2024 SolarGlyph Labs. All rights reserved.</p>
-     </div>
-    </footer>
-   </div>
-  </div>
-  <script>
-    const defaultConfig = {
-      background_color: "#000000",
-      surface_color: "#0a0a0a",
-      text_color: "#ffffff",
-      secondary_text_color: "#9ca3af",
-      accent_color: "#60a5fa",
-      font_family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      font_size: 16,
-      product_name: "Developer Intelligence",
-      tagline: "AI-Powered Development",
-      hero_description: "Transform your Roblox Studio workflow with intelligent code completion, instant debugging, and automated script generation",
-      cta_button_text: "Get Started Free",
-      feature_one_title: "Smart Code Completion",
-      feature_one_description: "AI-powered suggestions as you type, understanding context and your coding style",
-      feature_two_title: "Instant Debugging",
-      feature_two_description: "Find and fix errors in seconds with intelligent error detection and solutions",
-      feature_three_title: "Code Generation",
-      feature_three_description: "Generate complex scripts instantly from natural language descriptions",
-      installation_count: "1000+",
-      review_one_name: "Alex Rivera",
-      review_one_role: "Senior Game Developer",
-      review_one_rating: "5",
-      review_one_text: "This plugin has completely transformed my workflow. The AI suggestions are incredibly accurate and save me hours every day!",
-      review_two_name: "Sarah Chen",
-      review_two_role: "Roblox Script Developer",
-      review_two_rating: "5",
-      review_two_text: "The instant debugging feature alone is worth it. No more spending hours hunting for errors!",
-      review_three_name: "Marcus Webb",
-      review_three_role: "Studio Creator",
-      review_three_rating: "4",
-      review_three_text: "Amazing tool for both beginners and experienced developers. The code generation feature is mind-blowing!",
-      youtube_url: "https://www.youtube.com/channel/UCamDTpvyYaS7_46p6fESChw",
-      footer_text: "© 2024 SolarGlyph Labs. All rights reserved."
+<script>
+    const storeConfig = {
+        brandName: "SOLARGLYPH LABS",
+        products: [
+            {
+                name: "NEURAL LINK",
+                usdPrice: "24.99",
+                robuxPrice: "2,000",
+                badge: "NEW",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://via.placeholder.com/600x600/111/fff?text=PRODUCT+A"
+            },
+            {
+                name: "VOID ARMOR",
+                usdPrice: "14.99",
+                robuxPrice: "1,200",
+                badge: "LIMITED",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://via.placeholder.com/600x600/111/fff?text=PRODUCT+B"
+            }
+        ]
     };
 
-    function generateStars(rating, containerId) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      const numRating = parseInt(rating) || 0;
-      
-      for (let i = 1; i <= 5; i++) {
-        const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        star.setAttribute("class", i <= numRating ? "w-5 h-5 star" : "w-5 h-5 star-empty");
-        star.setAttribute("fill", "currentColor");
-        star.setAttribute("viewBox", "0 0 20 20");
-        
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z");
-        
-        star.appendChild(path);
-        container.appendChild(star);
-      }
-    }
+    document.getElementById('nav-brand').innerText = storeConfig.brandName;
 
-    async function onConfigChange(config) {
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      const fontSize = config.font_size || defaultConfig.font_size;
-      const baseFontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    const grid = document.getElementById('shop-grid');
+    storeConfig.products.forEach(p => {
+        grid.innerHTML += `
+            <div class="card">
+                ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+                <div class="img-container">
+                    <img src="${p.image}" class="product-img">
+                </div>
+                <h3>${p.name}</h3>
+                <div class="price-row">
+                    <span>$${p.usdPrice} USD</span>
+                    <span style="opacity:0.3">|</span>
+                    <span>R$ ${p.robuxPrice}</span>
+                </div>
+                <div class="btn-group">
+                    <a href="${p.learnMoreUrl}" class="btn btn-learn">Learn More</a>
+                    <a href="${p.buyUrl}" class="btn btn-buy">Buy Now</a>
+                </div>
+            </div>
+        `;
+    });
+</script>
 
-      // Apply font family
-      document.body.style.fontFamily = `${fontFamily}, ${baseFontStack}`;
-
-      // Apply colors
-      const backgroundColor = config.background_color || defaultConfig.background_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const accentColor = config.accent_color || defaultConfig.accent_color;
-
-      document.querySelector('.gradient-bg').style.background = `linear-gradient(180deg, ${backgroundColor} 0%, ${config.surface_color || defaultConfig.surface_color} 50%, ${backgroundColor} 100%)`;
-
-      // Apply text content
-      document.getElementById('product-name').textContent = config.product_name || defaultConfig.product_name;
-      document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
-      document.getElementById('hero-description').textContent = config.hero_description || defaultConfig.hero_description;
-      document.getElementById('cta-header').textContent = config.cta_button_text || defaultConfig.cta_button_text;
-      document.getElementById('cta-main').textContent = config.cta_button_text || defaultConfig.cta_button_text;
-      document.getElementById('cta-footer').textContent = config.cta_button_text || defaultConfig.cta_button_text;
-      
-      document.getElementById('feature-one-title').textContent = config.feature_one_title || defaultConfig.feature_one_title;
-      document.getElementById('feature-one-description').textContent = config.feature_one_description || defaultConfig.feature_one_description;
-      document.getElementById('feature-two-title').textContent = config.feature_two_title || defaultConfig.feature_two_title;
-      document.getElementById('feature-two-description').textContent = config.feature_two_description || defaultConfig.feature_two_description;
-      document.getElementById('feature-three-title').textContent = config.feature_three_title || defaultConfig.feature_three_title;
-      document.getElementById('feature-three-description').textContent = config.feature_three_description || defaultConfig.feature_three_description;
-
-      // Installation count
-      const installCount = config.installation_count || defaultConfig.installation_count;
-      document.getElementById('installation-count').innerHTML = `${installCount}<span class="text-blue-400">+</span>`;
-
-      // Reviews
-      document.getElementById('review-one-name').textContent = config.review_one_name || defaultConfig.review_one_name;
-      document.getElementById('review-one-role').textContent = config.review_one_role || defaultConfig.review_one_role;
-      document.getElementById('review-one-text').textContent = config.review_one_text || defaultConfig.review_one_text;
-      generateStars(config.review_one_rating || defaultConfig.review_one_rating, 'review-one-stars');
-
-      document.getElementById('review-two-name').textContent = config.review_two_name || defaultConfig.review_two_name;
-      document.getElementById('review-two-role').textContent = config.review_two_role || defaultConfig.review_two_role;
-      document.getElementById('review-two-text').textContent = config.review_two_text || defaultConfig.review_two_text;
-      generateStars(config.review_two_rating || defaultConfig.review_two_rating, 'review-two-stars');
-
-      document.getElementById('review-three-name').textContent = config.review_three_name || defaultConfig.review_three_name;
-      document.getElementById('review-three-role').textContent = config.review_three_role || defaultConfig.review_three_role;
-      document.getElementById('review-three-text').textContent = config.review_three_text || defaultConfig.review_three_text;
-      generateStars(config.review_three_rating || defaultConfig.review_three_rating, 'review-three-stars');
-
-      // YouTube link
-      document.getElementById('youtube-link').href = config.youtube_url || defaultConfig.youtube_url;
-      
-      document.getElementById('footer-text').textContent = config.footer_text || defaultConfig.footer_text;
-
-      // Apply font sizes proportionally
-      document.getElementById('product-name').style.fontSize = `${fontSize * 1.25}px`;
-      document.getElementById('tagline').style.fontSize = `${fontSize * 4}px`;
-      document.getElementById('hero-description').style.fontSize = `${fontSize * 1.25}px`;
-      
-      const featureTitles = document.querySelectorAll('[id^="feature-"][id$="-title"]');
-      featureTitles.forEach(title => {
-        title.style.fontSize = `${fontSize * 1.5}px`;
-      });
-      
-      const featureDescriptions = document.querySelectorAll('[id^="feature-"][id$="-description"]');
-      featureDescriptions.forEach(desc => {
-        desc.style.fontSize = `${fontSize}px`;
-      });
-    }
-
-    function mapToCapabilities(config) {
-      return {
-        recolorables: [
-          {
-            get: () => config.background_color || defaultConfig.background_color,
-            set: (value) => {
-              config.background_color = value;
-              if (window.elementSdk) {
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (value) => {
-              config.text_color = value;
-              if (window.elementSdk) {
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            }
-          },
-          {
-            get: () => config.accent_color || defaultConfig.accent_color,
-            set: (value) => {
-              config.accent_color = value;
-              if (window.elementSdk) {
-                window.elementSdk.setConfig({ accent_color: value });
-              }
-            }
-          }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => config.font_family || defaultConfig.font_family,
-          set: (value) => {
-            config.font_family = value;
-            if (window.elementSdk) {
-              window.elementSdk.setConfig({ font_family: value });
-            }
-          }
-        },
-        fontSizeable: {
-          get: () => config.font_size || defaultConfig.font_size,
-          set: (value) => {
-            config.font_size = value;
-            if (window.elementSdk) {
-              window.elementSdk.setConfig({ font_size: value });
-            }
-          }
-        }
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ["product_name", config.product_name || defaultConfig.product_name],
-        ["tagline", config.tagline || defaultConfig.tagline],
-        ["hero_description", config.hero_description || defaultConfig.hero_description],
-        ["cta_button_text", config.cta_button_text || defaultConfig.cta_button_text],
-        ["feature_one_title", config.feature_one_title || defaultConfig.feature_one_title],
-        ["feature_one_description", config.feature_one_description || defaultConfig.feature_one_description],
-        ["feature_two_title", config.feature_two_title || defaultConfig.feature_two_title],
-        ["feature_two_description", config.feature_two_description || defaultConfig.feature_two_description],
-        ["feature_three_title", config.feature_three_title || defaultConfig.feature_three_title],
-        ["feature_three_description", config.feature_three_description || defaultConfig.feature_three_description],
-        ["installation_count", config.installation_count || defaultConfig.installation_count],
-        ["review_one_name", config.review_one_name || defaultConfig.review_one_name],
-        ["review_one_role", config.review_one_role || defaultConfig.review_one_role],
-        ["review_one_rating", config.review_one_rating || defaultConfig.review_one_rating],
-        ["review_one_text", config.review_one_text || defaultConfig.review_one_text],
-        ["review_two_name", config.review_two_name || defaultConfig.review_two_name],
-        ["review_two_role", config.review_two_role || defaultConfig.review_two_role],
-        ["review_two_rating", config.review_two_rating || defaultConfig.review_two_rating],
-        ["review_two_text", config.review_two_text || defaultConfig.review_two_text],
-        ["review_three_name", config.review_three_name || defaultConfig.review_three_name],
-        ["review_three_role", config.review_three_role || defaultConfig.review_three_role],
-        ["review_three_rating", config.review_three_rating || defaultConfig.review_three_rating],
-        ["review_three_text", config.review_three_text || defaultConfig.review_three_text],
-        ["youtube_url", config.youtube_url || defaultConfig.youtube_url],
-        ["footer_text", config.footer_text || defaultConfig.footer_text]
-      ]);
-    }
-
-    // Initialize the SDK
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities,
-        mapToEditPanelValues
-      });
-    }
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b9a4f3f85e76f0a',t:'MTc2NzY5MzAxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
