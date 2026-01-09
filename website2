@@ -252,6 +252,84 @@
         grid.appendChild(card);
     });
 </script>
+
+    const storeConfig = {
+        brandName: "SOLARGLYPH LABS",
+        products: [
+            {
+                name: "Developer Intelligence",
+                usdPrice: "7.99",
+                robuxPrice: "899",
+                badge: "Recently updated",
+                learnMoreUrl: "#",
+                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            },
+            {
+                name: "Configuration Assist",
+                usdPrice: "1.00",
+                robuxPrice: "100",
+                badge: "NEW",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            }
+        ]
+    };
+
+    document.getElementById('nav-brand').innerText = storeConfig.brandName;
+
+    const grid = document.getElementById('shop-grid');
+    const overlay = document.getElementById('transition-overlay');
+    const loaderMsg = document.getElementById('loader-message');
+
+    // Updated Redirect Function
+    function handleRedirect(event, url, productName, isBuyPage) {
+        event.preventDefault();
+        
+        // Set the dynamic text
+        if (isBuyPage) {
+            loaderMsg.innerText = "Redirecting to Parcel";
+        } else {
+            loaderMsg.innerText = `Redirecting to ${productName}'s learn more page`;
+        }
+
+        // Trigger animation
+        overlay.classList.add('active');
+
+        setTimeout(() => {
+            window.location.href = url;
+        }, 3000);
+    }
+
+    storeConfig.products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+            <div class="img-container">
+                <img src="${p.image}" class="product-img">
+            </div>
+            <h3>${p.name}</h3>
+            <div class="price-row">
+                <span>$${p.usdPrice} USD</span>
+                <span style="opacity:0.3">|</span>
+                <span>R$ ${p.robuxPrice}</span>
+            </div>
+            <div class="btn-group">
+                <a href="${p.learnMoreUrl}" class="btn btn-learn" 
+                   onclick="handleRedirect(event, '${p.learnMoreUrl}', '${p.name}', false)">
+                   Learn More
+                </a>
+                <a href="${p.buyUrl}" class="btn btn-buy" 
+                   onclick="handleRedirect(event, '${p.buyUrl}', '${p.name}', true)">
+                   Buy Now
+                </a>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+</script>
     const storeConfig = {
         brandName: "SOLARGLYPH LABS",
         products: [
