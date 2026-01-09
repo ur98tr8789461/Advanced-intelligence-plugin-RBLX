@@ -52,17 +52,11 @@
             text-transform: uppercase;
             font-weight: 300;
             text-align: center;
-            animation: pulseText 2s infinite ease-in-out;
-        }
-
-        @keyframes pulseText {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         /* --- NAVIGATION & TALLER SEARCH --- */
         nav {
-            padding: 35px 5%;
+            padding: 30px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -73,7 +67,7 @@
             border-bottom: 1px solid var(--glass-border);
         }
 
-        .brand { font-weight: 600; letter-spacing: 5px; font-size: 1.2rem; }
+        .brand { font-weight: 600; letter-spacing: 4px; font-size: 1.2rem; }
 
         .search-container {
             display: flex;
@@ -81,18 +75,17 @@
             background: var(--glass);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            height: 54px; /* Taller Bar */
+            height: 54px; /* Taller as agreed */
             padding: 0 10px;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 54px; /* Start as square */
+            width: 54px;
             overflow: hidden;
         }
 
         .search-container.expanded {
-            width: 320px;
+            width: 300px;
             background: rgba(255,255,255,0.07);
             border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 0 20px rgba(255,255,255,0.05);
         }
 
         #search-input {
@@ -102,7 +95,6 @@
             background: transparent;
             color: white;
             outline: none;
-            font-size: 0.95rem;
             transition: all 0.4s ease;
             font-family: inherit;
         }
@@ -115,7 +107,6 @@
 
         .search-btn {
             min-width: 34px;
-            height: 34px;
             background: none;
             border: none;
             color: white;
@@ -123,13 +114,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.7;
-            transition: 0.3s;
         }
 
         .search-container.scanning {
             border-color: #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.4);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
         /* --- GRID & CARDS --- */
@@ -151,12 +140,6 @@
             transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             backdrop-filter: blur(10px);
             overflow: hidden;
-            animation: slideUp 0.8s ease forwards;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .card:hover {
@@ -165,25 +148,34 @@
             background: rgba(255,255,255,0.06);
         }
 
+        /* REVERTED: Original Image Container */
         .img-container {
             width: 100%;
-            height: 200px; /* Taller image space */
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 20px;
-            background: rgba(0,0,0,0.2);
         }
 
         .product-img {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
             transition: transform 0.8s ease;
         }
 
-        .card:hover .product-img { transform: scale(1.1); }
+        .card:hover .product-img {
+            transform: scale(1.08);
+        }
 
-        /* --- PRICE STYLING REVERTED --- */
+        /* REVERTED: Original Badge Styling */
+        .badge {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 10px; font-weight: 700;
+            background: var(--white); color: #000;
+            padding: 4px 10px; border-radius: 20px;
+            z-index: 2;
+        }
+
+        /* REVERTED: Original Price Styling */
         .price-row {
             display: flex; gap: 15px; margin: 15px 0 25px;
             font-size: 0.9rem; opacity: 0.8;
@@ -202,17 +194,30 @@
 
         .btn-learn { border: 1px solid var(--white); color: var(--white); }
         .btn-learn:hover { background: rgba(255,255,255,0.1); }
-        .btn-buy { background: var(--white); color: #000; }
+
+        .btn-buy { 
+            background: var(--white); color: #000; 
+            position: relative; overflow: hidden;
+        }
+
+        .btn-buy::after {
+            content: '';
+            position: absolute; top: -50%; left: -100%;
+            width: 50%; height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: rotate(30deg);
+            transition: 0.6s;
+        }
+        .btn-buy:hover::after { left: 150%; }
 
         /* --- EMPTY STATE --- */
         #no-results {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 100px 20px;
+            padding: 80px 20px;
             display: none;
         }
-
-        #no-results h2 { font-weight: 300; opacity: 0.5; letter-spacing: 2px; }
+        #no-results h2 { font-weight: 300; opacity: 0.5; }
 
         .hidden { display: none; }
 
@@ -221,23 +226,23 @@
 <body>
 
 <div id="transition-overlay">
-    <div class="loader-text" id="loader-message">Establishing Secure Connection</div>
+    <div class="loader-text" id="loader-message">Redirecting...</div>
 </div>
 
 <nav>
     <div class="brand">SOLARGLYPH LABS</div>
     <div class="search-container" id="search-wrapper">
-        <input type="text" id="search-input" placeholder="Search by name or tag...">
+        <input type="text" id="search-input" placeholder="Search products or tags...">
         <button class="search-btn" onclick="toggleSearch()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
     </div>
 </nav>
 
 <div class="container" id="shop-grid">
     <div id="no-results">
-        <h2>NO PROTOCOLS FOUND</h2>
-        <p style="opacity: 0.3; cursor: pointer;" onclick="resetSearch()">Click to reset filters</p>
+        <h2>No protocols found</h2>
+        <p style="opacity: 0.4; cursor: pointer; font-size: 0.8rem;" onclick="resetSearch()">RESET FILTERS</p>
     </div>
 </div>
 
@@ -274,7 +279,6 @@
     const searchInput = document.getElementById('search-input');
     const noResults = document.getElementById('no-results');
 
-    // --- SEARCH & TAG LOGIC ---
     function toggleSearch() {
         if (!searchWrapper.classList.contains('expanded')) {
             searchWrapper.classList.add('expanded');
@@ -307,9 +311,8 @@
                     card.classList.add('hidden');
                 }
             });
-
             noResults.style.display = found === 0 ? 'block' : 'none';
-        }, 400);
+        }, 300);
     }
 
     function resetSearch() {
@@ -319,22 +322,19 @@
 
     searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeSearch(); });
 
-    // --- REDIRECT LOGIC ---
     function handleRedirect(event, url, productName, isBuy) {
         event.preventDefault();
-        loaderMsg.innerText = isBuy ? "Redirecting to Parcel" : `Redirecting to ${productName}'s page`;
+        loaderMsg.innerText = isBuy ? "Redirecting to Parcel" : `Redirecting to ${productName}'s learn more page`;
         overlay.classList.add('active');
         setTimeout(() => { window.location.href = url; }, 3000);
     }
 
-    // --- RENDER PRODUCTS ---
     function render() {
-        storeConfig.products.forEach((p, index) => {
+        storeConfig.products.forEach((p) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.setAttribute('data-name', p.name);
             card.setAttribute('data-tags', JSON.stringify(p.tags));
-            card.style.animationDelay = `${index * 0.15}s`;
             card.innerHTML = `
                 ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
                 <div class="img-container"><img src="${p.image}" class="product-img"></div>
