@@ -3,164 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuilderBot AI Assist - Revolutionize Your Roblox Dev</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Lucide Icons -->
-    <script type="module">
-        import { createIcons, Search, Zap, Code, Users } from 'https://cdn.jsdelivr.net/npm/lucide@latest/dist/esm/lucide.js';
-        createIcons({ icons: { Search, Zap, Code, Users } });
-    </script>
+    <title>Solarglyph Labs | Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the Glassmorphism background */
+        :root {
+            --bg: #050505;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #ffffff;
+        }
+
         body {
+            background-color: var(--bg);
+            color: var(--white);
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #172554 100%);
-            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top, #111 0%, #050505 100%);
         }
-        /* Style for the glass cards */
-        .glass-card {
-            /* Background color with low opacity blue/white */
-            background-color: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+        /* --- TRANSITION OVERLAY --- */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 5, 0);
+            backdrop-filter: blur(0px);
+            z-index: 9999;
+            pointer-events: none; /* Allows clicking through until active */
+            transition: backdrop-filter 3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        background 3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
         }
+
+        #transition-overlay.active {
+            pointer-events: all;
+            backdrop-filter: blur(20px);
+            background: rgba(5, 5, 5, 0.8);
+            opacity: 1;
+        }
+
+        .loader-text {
+            font-size: 0.8rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 1s ease 0.5s;
+        }
+
+        #transition-overlay.active .loader-text {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Navigation */
+        nav {
+            padding: 30px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand { font-weight: 600; letter-spacing: 4px; font-size: 1.2rem; }
+
+        /* Grid Layout */
+        .container {
+            max-width: 1200px;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+        }
+
+        /* Product Card */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .img-container {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .product-img {
+            width: 100%;
+            transition: transform 0.8s ease;
+        }
+
+        .card:hover .product-img {
+            transform: scale(1.08);
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 10px; font-weight: 700;
+            background: var(--white); color: #000;
+            padding: 4px 10px; border-radius: 20px;
+            z-index: 2;
+        }
+
+        .price-row {
+            display: flex; gap: 15px; margin: 15px 0 25px;
+            font-size: 0.9rem; opacity: 0.8;
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; }
+        
+        .btn {
+            flex: 1; padding: 14px; border-radius: 10px;
+            text-decoration: none; text-align: center;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-learn { border: 1px solid var(--white); color: var(--white); }
+        .btn-learn:hover { background: rgba(255,255,255,0.1); }
+
+        .btn-buy { 
+            background: var(--white); color: #000; 
+            position: relative; overflow: hidden;
+        }
+
+        .btn-buy::after {
+            content: '';
+            position: absolute; top: -50%; left: -100%;
+            width: 50%; height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: rotate(30deg);
+            transition: 0.6s;
+        }
+
+        .btn-buy:hover::after { left: 150%; }
+
     </style>
 </head>
-<body class="text-white antialiased">
+<body>
 
-    <!-- Header / Navigation -->
-    <header class="p-4 sm:p-6 backdrop-blur-sm fixed w-full z-10 border-b border-white/10">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="#" class="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                BuilderBot AI Assist
-            </a>
-            <nav class="hidden sm:flex space-x-6 text-sm font-medium">
-                <a href="#features" class="hover:text-blue-400 transition">Features</a>
-                <a href="#demo" class="hover:text-blue-400 transition">Demo</a>
-                <a href="https://discord.gg/yydzPUDMBX" target="_blank" class="hover:text-blue-400 transition">Community</a>
-                <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="text-blue-400 hover:text-blue-300 transition">Get Plugin</a>
-            </nav>
-        </div>
-    </header>
+<div id="transition-overlay">
+    <div class="loader-text" id="loader-message">Redirecting...</div>
+</div>
 
-    <main class="pt-20">
+<script>
+    const storeConfig = {
+        brandName: "SOLARGLYPH LABS",
+        products: [
+            {
+                name: "Developer Intelligence",
+                usdPrice: "7.99",
+                robuxPrice: "899",
+                badge: "Recently updated",
+                learnMoreUrl: "#",
+                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            },
+            {
+                name: "Configuration Assist",
+                usdPrice: "1.00",
+                robuxPrice: "100",
+                badge: "NEW",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            }
+        ]
+    };
+
+    document.getElementById('nav-brand').innerText = storeConfig.brandName;
+
+    const grid = document.getElementById('shop-grid');
+    const overlay = document.getElementById('transition-overlay');
+    const loaderMsg = document.getElementById('loader-message');
+
+    // Updated Redirect Function
+    function handleRedirect(event, url, productName, isBuyPage) {
+        event.preventDefault();
         
-        <!-- Hero Section -->
-        <section class="max-w-7xl mx-auto px-4 py-16 sm:py-24 text-center">
-            <h1 class="text-5xl sm:text-7xl font-extrabold mb-4 leading-tight tracking-tighter">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                    Revolutionize
-                </span>
-                Your Roblox Development
-            </h1>
-            <p class="text-xl sm:text-2xl text-white/80 mb-10 max-w-3xl mx-auto">
-                BuilderBot is the ultimate AI assistant, helping you write, debug, and optimize your Luau code right inside Roblox Studio.
-            </p>
+        // Set the dynamic text
+        if (isBuyPage) {
+            loaderMsg.innerText = "Redirecting to Parcel";
+        } else {
+            loaderMsg.innerText = `Redirecting to ${productName}'s learn more page`;
+        }
 
-            <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" 
-               class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl transition-all 
-                      bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/50 hover:shadow-blue-400/50 transform hover:scale-[1.02]">
-                <i data-lucide="zap" class="w-6 h-6 mr-3"></i>
-                Get BuilderBot Plugin Now
-            </a>
-        </section>
+        // Trigger animation
+        overlay.classList.add('active');
 
-        <!-- Features Section -->
-        <section id="features" class="max-w-7xl mx-auto px-4 py-16 sm:py-24">
-            <h2 class="text-4xl font-bold text-center mb-16 text-white">Core Capabilities</h2>
-            
-            <div class="grid md:grid-cols-3 gap-8">
-                
-                <!-- Feature 1: Intelligent Scripting -->
-                <div class="glass-card p-6 sm:p-8 rounded-2xl transition hover:border-blue-400/50 hover:bg-white/15">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-blue-500 mb-4 shadow-xl">
-                        <i data-lucide="code" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3 text-blue-300">Intelligent Scripting</h3>
-                    <p class="text-white/70">
-                        Ask BuilderBot to generate complex Luau scripts, data structures, or gameplay mechanics. Get clean, modern, and efficient code snippets instantly.
-                    </p>
-                </div>
+        setTimeout(() => {
+            window.location.href = url;
+        }, 3000);
+    }
 
-                <!-- Feature 2: Instant Debugging & Optimization -->
-                <div class="glass-card p-6 sm:p-8 rounded-2xl transition hover:border-blue-400/50 hover:bg-white/15">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-indigo-500 mb-4 shadow-xl">
-                        <i data-lucide="search" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3 text-indigo-300">Instant Debugging</h3>
-                    <p class="text-white/70">
-                        Paste problematic code and have the AI identify errors, suggest fixes, and explain the underlying issue, dramatically reducing your debugging time.
-                    </p>
-                </div>
-
-                <!-- Feature 3: Documentation & Learning -->
-                <div class="glass-card p-6 sm:p-8 rounded-2xl transition hover:border-blue-400/50 hover:bg-white/15">
-                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-sky-500 mb-4 shadow-xl">
-                        <i data-lucide="zap" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3 text-sky-300">Code Explanation</h3>
-                    <p class="text-white/70">
-                        Don't understand a piece of code? Ask BuilderBot to break it down, explain the purpose of functions, and clarify complex Roblox API interactions.
-                    </p>
-                </div>
-
+    storeConfig.products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+            <div class="img-container">
+                <img src="${p.image}" class="product-img">
             </div>
-        </section>
-        
-        <!-- Video Demo Section -->
-        <section id="demo" class="max-w-7xl mx-auto px-4 py-16 sm:py-24 text-center">
-            <h2 class="text-4xl font-bold mb-6 text-white">See BuilderBot in Action</h2>
-            <p class="text-lg text-white/70 mb-10 max-w-3xl mx-auto">
-                Watch the official demonstration video to see exactly how BuilderBot integrates into your workflow and speeds up development.
-            </p>
-
-            <!-- YouTube Embed/Link -->
-            <div class="max-w-4xl mx-auto glass-card rounded-2xl overflow-hidden p-6">
-                <!-- Fallback button, since embedding requires a proper video player setup, we link directly -->
-                <p class="text-xl font-semibold mb-4 text-white">Video Demonstration</p>
-                <p class="text-white/70 mb-6">Click the button below to watch the full demo on YouTube.</p>
-
-                <a href="https://youtu.be/t4lywaYf4b4?si=ar3p5xLPupOrnATM" target="_blank" 
-                   class="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl transition-all 
-                          bg-red-600 hover:bg-red-500 shadow-lg shadow-red-500/50 hover:shadow-red-400/50">
-                    Watch the Full Demo
+            <h3>${p.name}</h3>
+            <div class="price-row">
+                <span>$${p.usdPrice} USD</span>
+                <span style="opacity:0.3">|</span>
+                <span>R$ ${p.robuxPrice}</span>
+            </div>
+            <div class="btn-group">
+                <a href="${p.learnMoreUrl}" class="btn btn-learn" 
+                   onclick="handleRedirect(event, '${p.learnMoreUrl}', '${p.name}', false)">
+                   Learn More
+                </a>
+                <a href="${p.buyUrl}" class="btn btn-buy" 
+                   onclick="handleRedirect(event, '${p.buyUrl}', '${p.name}', true)">
+                   Buy Now
                 </a>
             </div>
-        </section>
+        `;
+        grid.appendChild(card);
+    });
+</script>
+    const storeConfig = {
+        brandName: "SOLARGLYPH LABS",
+        products: [
+            {
+                name: "Developer Intelligence",
+                usdPrice: "7.99",
+                robuxPrice: "899",
+                badge: "Recently updated",
+                learnMoreUrl: "#",
+                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            },
+            {
+                name: "Configuration Assist",
+                usdPrice: "1.00",
+                robuxPrice: "100",
+                badge: "NEW",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            }
+        ]
+    };
+
+    document.getElementById('nav-brand').innerText = storeConfig.brandName;
+
+    const grid = document.getElementById('shop-grid');
+    const overlay = document.getElementById('transition-overlay');
+
+    // Function to handle the animated redirect
+    function handleRedirect(event, url) {
+        event.preventDefault(); // Stop immediate navigation
         
-        <!-- Discord Community Call to Action -->
-        <section class="max-w-7xl mx-auto px-4 py-16 sm:py-24 text-center">
-             <div class="glass-card p-8 sm:p-12 rounded-3xl max-w-4xl mx-auto">
-                <h2 class="text-4xl font-bold mb-4 text-white">Join the Community</h2>
-                <p class="text-lg text-white/80 mb-8">
-                    Connect with other developers, share tips, get support, and suggest new features for BuilderBot on our Discord server.
-                </p>
-                <a href="https://discord.gg/yydzPUDMBX" target="_blank" 
-                   class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl transition-all 
-                          bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/50 hover:shadow-indigo-400/50 transform hover:scale-[1.02]">
-                    <i data-lucide="users" class="w-6 h-6 mr-3"></i>
-                    Join Discord Server
-                </a>
-             </div>
-        </section>
+        // Start the animation
+        overlay.classList.add('active');
 
-    </main>
+        // Wait 3 seconds, then go to the link
+        setTimeout(() => {
+            window.location.href = url;
+        }, 3000);
+    }
 
-    <!-- Footer -->
-    <footer class="mt-12 py-8 border-t border-white/10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:items-center text-sm text-white/60">
-            <p>&copy; 2025 BuilderBot AI Assist. All rights reserved.</p>
-            <div class="flex justify-center sm:justify-end space-x-6 mt-4 sm:mt-0">
-                <a href="https://create.roblox.com/store/asset/78782724247257/BuilderBot-AI-Assist" target="_blank" class="hover:text-blue-400 transition">Roblox Store</a>
-                <a href="https://discord.gg/yydzPUDMBX" target="_blank" class="hover:text-blue-400 transition">Discord</a>
-                <a href="https://youtu.be/t4lywaYf4b4?si=ar3p5xLPupOrnATM" target="_blank" class="hover:text-blue-400 transition">Demo Video</a>
+    storeConfig.products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+            <div class="img-container">
+                <img src="${p.image}" class="product-img">
             </div>
-        </div>
-    </footer>
+            <h3>${p.name}</h3>
+            <div class="price-row">
+                <span>$${p.usdPrice} USD</span>
+                <span style="opacity:0.3">|</span>
+                <span>R$ ${p.robuxPrice}</span>
+            </div>
+            <div class="btn-group">
+                <a href="${p.learnMoreUrl}" class="btn btn-learn" onclick="handleRedirect(event, '${p.learnMoreUrl}')">Learn More</a>
+                <a href="${p.buyUrl}" class="btn btn-buy" onclick="handleRedirect(event, '${p.buyUrl}')">Buy Now</a>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+</script>
 
 </body>
 </html>
-
