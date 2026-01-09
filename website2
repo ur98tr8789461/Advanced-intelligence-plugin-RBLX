@@ -21,21 +21,18 @@
             margin: 0;
             overflow-x: hidden;
             background: radial-gradient(circle at top, #111 0%, #050505 100%);
+            min-height: 100vh;
         }
 
-        /* --- TRANSITION OVERLAY --- */
+        /* --- REDIRECT OVERLAY --- */
         #transition-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 5, 5, 0);
             backdrop-filter: blur(0px);
             z-index: 9999;
-            pointer-events: none; /* Allows clicking through until active */
-            transition: backdrop-filter 3s cubic-bezier(0.4, 0, 0.2, 1), 
-                        background 3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            transition: all 3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -44,28 +41,22 @@
 
         #transition-overlay.active {
             pointer-events: all;
-            backdrop-filter: blur(20px);
-            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(30px);
+            background: rgba(5, 5, 5, 0.85);
             opacity: 1;
         }
 
         .loader-text {
-            font-size: 0.8rem;
-            letter-spacing: 5px;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 1s ease 0.5s;
+            font-weight: 300;
+            text-align: center;
         }
 
-        #transition-overlay.active .loader-text {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Navigation */
+        /* --- NAVIGATION & SEARCH --- */
         nav {
-            padding: 30px 5%;
+            padding: 20px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -76,9 +67,54 @@
             border-bottom: 1px solid var(--glass-border);
         }
 
-        .brand { font-weight: 600; letter-spacing: 4px; font-size: 1.2rem; }
+        .brand { font-weight: 600; letter-spacing: 4px; font-size: 1.1rem; }
 
-        /* Grid Layout */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 5px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #search-input {
+            width: 0;
+            opacity: 0;
+            border: none;
+            background: transparent;
+            color: white;
+            outline: none;
+            padding: 0;
+            transition: all 0.5s ease;
+            font-family: inherit;
+        }
+
+        .search-container.expanded {
+            width: 250px;
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .search-container.expanded #search-input {
+            width: 100%;
+            opacity: 1;
+            padding-left: 10px;
+        }
+
+        .search-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- GRID & CARDS --- */
         .container {
             max-width: 1200px;
             margin: 60px auto;
@@ -86,18 +122,24 @@
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 40px;
             padding: 0 20px;
+            transition: opacity 0.5s ease;
         }
 
-        /* Product Card */
         .card {
             background: var(--glass);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 24px;
             position: relative;
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
             backdrop-filter: blur(10px);
             overflow: hidden;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .card:hover {
@@ -118,9 +160,7 @@
             transition: transform 0.8s ease;
         }
 
-        .card:hover .product-img {
-            transform: scale(1.08);
-        }
+        .card:hover .product-img { transform: scale(1.08); }
 
         .badge {
             position: absolute;
@@ -131,12 +171,6 @@
             z-index: 2;
         }
 
-        .price-row {
-            display: flex; gap: 15px; margin: 15px 0 25px;
-            font-size: 0.9rem; opacity: 0.8;
-        }
-
-        /* Buttons */
         .btn-group { display: flex; gap: 10px; }
         
         .btn {
@@ -149,34 +183,32 @@
 
         .btn-learn { border: 1px solid var(--white); color: var(--white); }
         .btn-learn:hover { background: rgba(255,255,255,0.1); }
+        .btn-buy { background: var(--white); color: #000; }
 
-        .btn-buy { 
-            background: var(--white); color: #000; 
-            position: relative; overflow: hidden;
-        }
-
-        .btn-buy::after {
-            content: '';
-            position: absolute; top: -50%; left: -100%;
-            width: 50%; height: 200%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
-            transform: rotate(30deg);
-            transition: 0.6s;
-        }
-
-        .btn-buy:hover::after { left: 150%; }
+        .hidden { display: none; }
 
     </style>
 </head>
 <body>
 
 <div id="transition-overlay">
-    <div class="loader-text" id="loader-message">Redirecting...</div>
+    <div class="loader-text" id="loader-message">Initializing...</div>
 </div>
+
+<nav>
+    <div class="brand">SOLARGLYPH LABS</div>
+    <div class="search-container" id="search-wrapper">
+        <input type="text" id="search-input" placeholder="Search Protocol...">
+        <button class="search-btn" onclick="toggleSearch()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+    </div>
+</nav>
+
+<div class="container" id="shop-grid"></div>
 
 <script>
     const storeConfig = {
-        brandName: "SOLARGLYPH LABS",
         products: [
             {
                 name: "Developer Intelligence",
@@ -184,7 +216,7 @@
                 robuxPrice: "899",
                 badge: "Recently updated",
                 learnMoreUrl: "#",
-                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
+                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j",
                 image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
             },
             {
@@ -198,201 +230,76 @@
             }
         ]
     };
-
-    document.getElementById('nav-brand').innerText = storeConfig.brandName;
 
     const grid = document.getElementById('shop-grid');
     const overlay = document.getElementById('transition-overlay');
     const loaderMsg = document.getElementById('loader-message');
+    const searchWrapper = document.getElementById('search-wrapper');
+    const searchInput = document.getElementById('search-input');
 
-    // Updated Redirect Function
-    function handleRedirect(event, url, productName, isBuyPage) {
-        event.preventDefault();
-        
-        // Set the dynamic text
-        if (isBuyPage) {
-            loaderMsg.innerText = "Redirecting to Parcel";
+    // --- SEARCH LOGIC ---
+    function toggleSearch() {
+        if (!searchWrapper.classList.contains('expanded')) {
+            searchWrapper.classList.add('expanded');
+            searchInput.focus();
+        } else if (searchInput.value === "") {
+            searchWrapper.classList.remove('expanded');
         } else {
-            loaderMsg.innerText = `Redirecting to ${productName}'s learn more page`;
+            executeSearch();
         }
-
-        // Trigger animation
-        overlay.classList.add('active');
-
-        setTimeout(() => {
-            window.location.href = url;
-        }, 3000);
     }
 
-    storeConfig.products.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
-            <div class="img-container">
-                <img src="${p.image}" class="product-img">
-            </div>
-            <h3>${p.name}</h3>
-            <div class="price-row">
-                <span>$${p.usdPrice} USD</span>
-                <span style="opacity:0.3">|</span>
-                <span>R$ ${p.robuxPrice}</span>
-            </div>
-            <div class="btn-group">
-                <a href="${p.learnMoreUrl}" class="btn btn-learn" 
-                   onclick="handleRedirect(event, '${p.learnMoreUrl}', '${p.name}', false)">
-                   Learn More
-                </a>
-                <a href="${p.buyUrl}" class="btn btn-buy" 
-                   onclick="handleRedirect(event, '${p.buyUrl}', '${p.name}', true)">
-                   Buy Now
-                </a>
-            </div>
-        `;
-        grid.appendChild(card);
+    function executeSearch() {
+        const query = searchInput.value.toLowerCase();
+        grid.style.opacity = '0'; // Brief fade for "looking" effect
+        
+        setTimeout(() => {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const title = card.querySelector('h3').innerText.toLowerCase();
+                if (title.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            grid.style.opacity = '1';
+        }, 300);
+    }
+
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') executeSearch();
     });
-</script>
 
-    const storeConfig = {
-        brandName: "SOLARGLYPH LABS",
-        products: [
-            {
-                name: "Developer Intelligence",
-                usdPrice: "7.99",
-                robuxPrice: "899",
-                badge: "Recently updated",
-                learnMoreUrl: "#",
-                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
-                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
-            },
-            {
-                name: "Configuration Assist",
-                usdPrice: "1.00",
-                robuxPrice: "100",
-                badge: "NEW",
-                learnMoreUrl: "#",
-                buyUrl: "https://parcel.gg/",
-                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
-            }
-        ]
-    };
-
-    document.getElementById('nav-brand').innerText = storeConfig.brandName;
-
-    const grid = document.getElementById('shop-grid');
-    const overlay = document.getElementById('transition-overlay');
-    const loaderMsg = document.getElementById('loader-message');
-
-    // Updated Redirect Function
-    function handleRedirect(event, url, productName, isBuyPage) {
+    // --- REDIRECT LOGIC ---
+    function handleRedirect(event, url, productName, isBuy) {
         event.preventDefault();
-        
-        // Set the dynamic text
-        if (isBuyPage) {
-            loaderMsg.innerText = "Redirecting to Parcel";
-        } else {
-            loaderMsg.innerText = `Redirecting to ${productName}'s learn more page`;
-        }
-
-        // Trigger animation
+        loaderMsg.innerText = isBuy ? "Redirecting to Parcel" : `Redirecting to ${productName}'s learn more page`;
         overlay.classList.add('active');
-
-        setTimeout(() => {
-            window.location.href = url;
-        }, 3000);
+        setTimeout(() => { window.location.href = url; }, 3000);
     }
 
-    storeConfig.products.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
-            <div class="img-container">
-                <img src="${p.image}" class="product-img">
-            </div>
-            <h3>${p.name}</h3>
-            <div class="price-row">
-                <span>$${p.usdPrice} USD</span>
-                <span style="opacity:0.3">|</span>
-                <span>R$ ${p.robuxPrice}</span>
-            </div>
-            <div class="btn-group">
-                <a href="${p.learnMoreUrl}" class="btn btn-learn" 
-                   onclick="handleRedirect(event, '${p.learnMoreUrl}', '${p.name}', false)">
-                   Learn More
-                </a>
-                <a href="${p.buyUrl}" class="btn btn-buy" 
-                   onclick="handleRedirect(event, '${p.buyUrl}', '${p.name}', true)">
-                   Buy Now
-                </a>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-</script>
-    const storeConfig = {
-        brandName: "SOLARGLYPH LABS",
-        products: [
-            {
-                name: "Developer Intelligence",
-                usdPrice: "7.99",
-                robuxPrice: "899",
-                badge: "Recently updated",
-                learnMoreUrl: "#",
-                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
-                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
-            },
-            {
-                name: "Configuration Assist",
-                usdPrice: "1.00",
-                robuxPrice: "100",
-                badge: "NEW",
-                learnMoreUrl: "#",
-                buyUrl: "https://parcel.gg/",
-                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
-            }
-        ]
-    };
-
-    document.getElementById('nav-brand').innerText = storeConfig.brandName;
-
-    const grid = document.getElementById('shop-grid');
-    const overlay = document.getElementById('transition-overlay');
-
-    // Function to handle the animated redirect
-    function handleRedirect(event, url) {
-        event.preventDefault(); // Stop immediate navigation
-        
-        // Start the animation
-        overlay.classList.add('active');
-
-        // Wait 3 seconds, then go to the link
-        setTimeout(() => {
-            window.location.href = url;
-        }, 3000);
+    // --- RENDER PRODUCTS ---
+    function render() {
+        storeConfig.products.forEach((p, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.innerHTML = `
+                ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+                <div class="img-container"><img src="${p.image}" class="product-img"></div>
+                <h3>${p.name}</h3>
+                <div class="price-row"><span>$${p.usdPrice} USD</span> | <span>R$ ${p.robuxPrice}</span></div>
+                <div class="btn-group">
+                    <a href="#" class="btn btn-learn" onclick="handleRedirect(event, '${p.learnMoreUrl}', '${p.name}', false)">Learn More</a>
+                    <a href="#" class="btn btn-buy" onclick="handleRedirect(event, '${p.buyUrl}', '${p.name}', true)">Buy Now</a>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
     }
 
-    storeConfig.products.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
-            <div class="img-container">
-                <img src="${p.image}" class="product-img">
-            </div>
-            <h3>${p.name}</h3>
-            <div class="price-row">
-                <span>$${p.usdPrice} USD</span>
-                <span style="opacity:0.3">|</span>
-                <span>R$ ${p.robuxPrice}</span>
-            </div>
-            <div class="btn-group">
-                <a href="${p.learnMoreUrl}" class="btn btn-learn" onclick="handleRedirect(event, '${p.learnMoreUrl}')">Learn More</a>
-                <a href="${p.buyUrl}" class="btn btn-buy" onclick="handleRedirect(event, '${p.buyUrl}')">Buy Now</a>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
+    render();
 </script>
 
 </body>
