@@ -3,160 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Assistant | Elite AI</title>
+    <title>Solarglyph Labs | Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #020205;
-            --navy: #050a18;
-            --gold: #D4AF37;
-            --gold-glow: rgba(212, 175, 55, 0.3);
+            --bg: #050505;
+            --white: #ffffff;
             --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(212, 175, 55, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #ffffff;
         }
 
         body {
             background-color: var(--bg);
-            color: #fff;
-            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
             margin: 0;
             overflow-x: hidden;
-            scroll-behavior: smooth;
+            background: radial-gradient(circle at top, #111 0%, #050505 100%);
         }
 
-        /* Ambient Glows */
-        .ambient {
-            position: fixed; width: 50vw; height: 50vw;
-            background: radial-gradient(circle, rgba(10, 25, 47, 0.4) 0%, transparent 70%);
-            filter: blur(100px); z-index: -1;
+        /* --- TRANSITION OVERLAY --- */
+        #transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 5, 0);
+            backdrop-filter: blur(0px);
+            z-index: 9999;
+            pointer-events: none; /* Allows clicking through until active */
+            transition: backdrop-filter 3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        background 3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        #transition-overlay.active {
+            pointer-events: all;
+            backdrop-filter: blur(20px);
+            background: rgba(5, 5, 5, 0.8);
+            opacity: 1;
+        }
 
-        /* Hero Section */
-        .hero { text-align: center; padding: 120px 0 60px; }
-        .hero h1 { font-size: 4.5rem; margin: 0; font-weight: 900; letter-spacing: -2px; }
-        .gold-text { color: var(--gold); text-shadow: 0 0 25px var(--gold-glow); }
+        .loader-text {
+            font-size: 0.8rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 1s ease 0.5s;
+        }
+
+        #transition-overlay.active .loader-text {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Navigation */
+        nav {
+            padding: 30px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand { font-weight: 600; letter-spacing: 4px; font-size: 1.2rem; }
+
+        /* Grid Layout */
+        .container {
+            max-width: 1200px;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+        }
+
+        /* Product Card */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .img-container {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .product-img {
+            width: 100%;
+            transition: transform 0.8s ease;
+        }
+
+        .card:hover .product-img {
+            transform: scale(1.08);
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 10px; font-weight: 700;
+            background: var(--white); color: #000;
+            padding: 4px 10px; border-radius: 20px;
+            z-index: 2;
+        }
+
+        .price-row {
+            display: flex; gap: 15px; margin: 15px 0 25px;
+            font-size: 0.9rem; opacity: 0.8;
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; }
         
-        /* The White Button */
-        .btn-white {
-            background: #fff; color: #000;
-            padding: 20px 50px; border-radius: 15px;
-            text-decoration: none; font-weight: 800; font-size: 1.1rem;
-            display: inline-block; margin-top: 30px;
-            border: 2px solid var(--gold);
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px var(--gold-glow);
+        .btn {
+            flex: 1; padding: 14px; border-radius: 10px;
+            text-decoration: none; text-align: center;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; transition: 0.3s;
+            cursor: pointer;
         }
-        .btn-white:hover { transform: scale(1.05); box-shadow: 0 0 40px var(--gold); background: #f0f0f0; }
 
-        /* Features Section */
-        .section-title { text-align: center; color: var(--gold); margin-top: 80px; font-size: 2rem; }
-        
-        .features-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px; margin-top: 40px;
-        }
-        .f-card {
-            background: var(--glass); backdrop-filter: blur(15px);
-            border: 1px solid var(--border); padding: 35px; border-radius: 25px;
-            transition: 0.3s;
-        }
-        .f-card:hover { border-color: var(--gold); transform: translateY(-10px); }
-        .f-card h3 { color: var(--gold); margin-top: 0; }
+        .btn-learn { border: 1px solid var(--white); color: var(--white); }
+        .btn-learn:hover { background: rgba(255,255,255,0.1); }
 
-        /* Install Steps */
-        .install-box {
-            background: linear-gradient(to bottom right, var(--navy), var(--bg));
-            border: 1px solid var(--border); border-radius: 30px;
-            padding: 50px; margin-top: 40px;
+        .btn-buy { 
+            background: var(--white); color: #000; 
+            position: relative; overflow: hidden;
         }
-        .step { display: flex; align-items: flex-start; margin-bottom: 25px; }
-        .step-n { background: var(--gold); color: #000; width: 30px; height: 30px; 
-                  border-radius: 50%; display: flex; align-items: center; 
-                  justify-content: center; font-weight: bold; margin-right: 20px; flex-shrink: 0; }
 
-        /* Review Section */
-        #review-list {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px; margin: 40px 0 100px;
+        .btn-buy::after {
+            content: '';
+            position: absolute; top: -50%; left: -100%;
+            width: 50%; height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: rotate(30deg);
+            transition: 0.6s;
         }
-        .r-card { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        .hero-floating { animation: float 6s ease-in-out infinite; }
+        .btn-buy:hover::after { left: 150%; }
+
     </style>
 </head>
 <body>
 
-    <div class="ambient" style="top: -10%; left: -10%;"></div>
-    <div class="ambient" style="bottom: -10%; right: -10%; background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);"></div>
+<div id="transition-overlay">
+    <div class="loader-text">Redirecting to Secure Gateway</div>
+</div>
 
-    <div class="container">
-        <section class="hero hero-floating">
-            <h1>Studio <span class="gold-text">Assistant</span></h1>
-            <p style="font-size: 1.3rem; opacity: 0.7; max-width: 600px; margin: 20px auto;">The premium AI workflow for Roblox Studio. Speed, complexity, and understanding—all in one plugin.</p>
-            <a href="https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2F6941ecd03de84cc66e0dcc82" class="btn-white">PURCHASE NOW</a>
-        </section>
+<nav>
+    <div class="brand" id="nav-brand">SOLARGLYPH LABS</div>
+</nav>
 
-        <h2 class="section-title">Core Capabilities</h2>
-        <div class="features-grid">
-            <div class="f-card">
-                <h3>⚡ Dual-Engine AI</h3>
-                <p>Features a <b>Turbo Model</b> for lightning-fast snippets and a <b>Pro Model</b> for heavy logic and complex math.</p>
-            </div>
-            <div class="f-card">
-                <h3>📜 Luau Executor</h3>
-                <p>Instantly transform natural language prompts into high-performance, Roblox-ready Luau scripts.</p>
-            </div>
-            <div class="f-card">
-                <h3>🔍 Script Summary</h3>
-                <p>Never get lost in old code again. Get a full breakdown of any script's logic in seconds.</p>
-            </div>
-        </div>
+<div class="container" id="shop-grid"></div>
 
-        <h2 class="section-title">How to Install</h2>
-        <div class="install-box">
-            <div class="step">
-                <div class="step-n">1</div>
-                <div><strong>Download:</strong> Purchase via the link above and download your .rbxm file.</div>
-            </div>
-            <div class="step">
-                <div class="step-n">2</div>
-                <div><strong>Import:</strong> Drag the file into Roblox Studio. Open the <b>Module Folder</b> inside.</div>
-            </div>
-            <div class="step">
-                <div class="step-n">3</div>
-                <div><strong>Configure:</strong> Edit the settings in the Module folder to match your workflow.</div>
-            </div>
-            <div class="step">
-                <div class="step-n">4</div>
-                <div><strong>Save:</strong> Right-click the folder and select "Save as Local Plugin."</div>
-            </div>
-        </div>
+<script>
+    const storeConfig = {
+        brandName: "SOLARGLYPH LABS",
+        products: [
+            {
+                name: "Developer Intelligence",
+                usdPrice: "7.99",
+                robuxPrice: "899",
+                badge: "Recently updated",
+                learnMoreUrl: "#",
+                buyUrl: "https://packables.store/6941ecd03de84cc66e0dcc82/product/1s3120oy9t55xyqei0vw1b7e4r7j?origin=https%3A%2F%2Fpackables.store%2Fmarketplace%2Fproducts%3Fsearch%3DAdvanced%2520intelligence",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            },
+            {
+                name: "Configuration Assist",
+                usdPrice: "1.00",
+                robuxPrice: "100",
+                badge: "NEW",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://github.com/ur98tr8789461/Advanced-intelligence-plugin-RBLX/blob/3cae5f1bcab478d70d997c49de66f51d63f914e0/DeveloperInteligencelogo1(1).png?raw=true"
+            }
+        ]
+    };
 
-        <h2 class="section-title">Developer Feedback</h2>
-        <div id="review-list"></div>
-    </div>
+    document.getElementById('nav-brand').innerText = storeConfig.brandName;
 
-    <script>
-        // CONFIG TABLE FOR REVIEWS
-        const reviews = [
-            { user: "Noah", text: "I love how quick and easy i can make stuff without issues.", stars: 5 },
-            { user: "Skilled scripter", text: "This is as good as me and I've been scripting for years.", stars: 4 },
-            { user: "Pro developer", text: "Finally an AI that actually understands Luau optimizations.", stars: 4 },
-            { user: "Mrcheekymonky", text: "The Luau executer saved me hours on my project", stars: 5 }
-        ];
+    const grid = document.getElementById('shop-grid');
+    const overlay = document.getElementById('transition-overlay');
 
-        const list = document.getElementById('review-list');
-        reviews.forEach(r => {
-            list.innerHTML += `
-                <div class="r-card">
-                    <div style="color: var(--gold); margin-bottom: 10px;">${"★".repeat(r.stars)}</div>
-                    <p style="font-style: italic; opacity: 0.8;">"${r.text}"</p>
-                    <div style="margin-top: 15px; font-size: 0.8rem; color: var(--gold);">@${r.user}</div>
-                </div>
-            `;
-        });
-    </script>
+    // Function to handle the animated redirect
+    function handleRedirect(event, url) {
+        event.preventDefault(); // Stop immediate navigation
+        
+        // Start the animation
+        overlay.classList.add('active');
+
+        // Wait 3 seconds, then go to the link
+        setTimeout(() => {
+            window.location.href = url;
+        }, 3000);
+    }
+
+    storeConfig.products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+            <div class="img-container">
+                <img src="${p.image}" class="product-img">
+            </div>
+            <h3>${p.name}</h3>
+            <div class="price-row">
+                <span>$${p.usdPrice} USD</span>
+                <span style="opacity:0.3">|</span>
+                <span>R$ ${p.robuxPrice}</span>
+            </div>
+            <div class="btn-group">
+                <a href="${p.learnMoreUrl}" class="btn btn-learn" onclick="handleRedirect(event, '${p.learnMoreUrl}')">Learn More</a>
+                <a href="${p.buyUrl}" class="btn btn-buy" onclick="handleRedirect(event, '${p.buyUrl}')">Buy Now</a>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+</script>
+
 </body>
 </html>
