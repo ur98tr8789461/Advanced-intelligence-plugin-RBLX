@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solarglyph Labs | Redesign</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.05);
+            --accent: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Nav - Minimalist Glass Bar */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 40px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+
+        .brand { font-weight: 800; letter-spacing: 8px; font-size: 1rem; }
+
+        /* Product Section - Vertical Layout */
+        .store-wrapper {
+            padding: 150px 6% 100px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 200px; /* High-end breathing room */
+            position: relative;
+        }
+
+        /* Large Background Text (Redesign Feature) */
+        .bg-text {
+            position: absolute;
+            font-size: 12vw;
+            font-weight: 800;
+            color: rgba(255,255,255,0.03);
+            z-index: -1;
+            white-space: nowrap;
+            top: -50px; left: -20px;
+            user-select: none;
+        }
+
+        .product-visual {
+            width: 45%;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .product-img {
+            width: 100%;
+            filter: grayscale(1);
+            transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .product-row:hover .product-img {
+            filter: grayscale(0);
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            width: 45%;
+            padding-left: 40px;
+            border-left: 1px solid rgba(255,255,255,0.1); /* The "Blade" */
+        }
+
+        .product-name {
+            font-size: 3rem;
+            font-weight: 200;
+            margin: 0 0 20px 0;
+            letter-spacing: -1px;
+        }
+
+        .prices {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .price-robux { opacity: 0.4; }
+
+        /* Action Buttons - Redesigned to be Sleek Links */
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .action-link {
+            text-decoration: none;
+            color: var(--white);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            width: fit-content;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .action-link::after {
+            content: ' →';
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .action-link:hover {
+            padding-left: 10px;
+            border-bottom-color: var(--white);
+        }
+
+        .action-link:hover::after {
+            opacity: 1;
+        }
+
+        .buy-now {
+            background: var(--white);
+            color: #000;
+            padding: 18px 40px;
+            border-radius: 0; /* Sharp corners for modern look */
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="brand" id="nav-brand">SOLARGLYPH LABS</div>
+    <div style="font-size: 0.8rem; letter-spacing: 2px;">V.02-CORE</div>
+</nav>
+
+<div class="store-wrapper" id="store-container">
+    </div>
+
+<script>
+    const storeConfig = {
+        brandName: "SOLARGLYPH LABS",
+        products: [
+            {
+                name: "NEURAL LINK",
+                usdPrice: "24.99",
+                robuxPrice: "2,000",
+                description: "Deep-layer cognitive interface.",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://via.placeholder.com/800x1000/111/fff"
+            },
+            {
+                name: "VOID ARMOR",
+                usdPrice: "14.99",
+                robuxPrice: "1,200",
+                description: "High-density aesthetic protection.",
+                learnMoreUrl: "#",
+                buyUrl: "https://parcel.gg/",
+                image: "https://via.placeholder.com/800x1000/111/fff"
+            }
+        ]
+    };
+
+    document.getElementById('nav-brand').innerText = storeConfig.brandName;
+
+    const container = document.getElementById('store-container');
+    storeConfig.products.forEach((p, index) => {
+        // Alternates image side for asymmetrical look
+        const isEven = index % 2 === 0;
+        container.innerHTML += `
+            <div class="product-row" style="flex-direction: ${isEven ? 'row' : 'row-reverse'}">
+                <div class="bg-text">${p.name}</div>
+                <div class="product-visual">
+                    <img src="${p.image}" class="product-img">
+                </div>
+                <div class="product-info" style="${isEven ? '' : 'border-left:none; border-right:1px solid rgba(255,255,255,0.1); padding-left:0; padding-right:40px; text-align:right; align-items:flex-end;'}">
+                    <h2 class="product-name">${p.name}</h2>
+                    <div class="prices" style="${isEven ? '' : 'justify-content: flex-end;'}">
+                        <span>$${p.usdPrice}</span>
+                        <span class="price-robux">R$ ${p.robuxPrice}</span>
+                    </div>
+                    <div class="actions" style="${isEven ? '' : 'align-items: flex-end;'}">
+                        <a href="${p.learnMoreUrl}" class="action-link">Learn More</a>
+                        <a href="${p.buyUrl}" class="action-link buy-now">Purchase Access</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+</script>
+
+</body>
+</html>
