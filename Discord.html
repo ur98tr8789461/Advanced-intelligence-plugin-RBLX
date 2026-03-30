@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Discord Announcement Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0b0c10;
+    --surface: #13151c;
+    --surface2: #1a1d27;
+    --surface3: #21253300;
+    --border: #272b3d;
+    --border-bright: #363c55;
+    --accent: #5865f2;
+    --accent2: #eb459e;
+    --accent-glow: rgba(88,101,242,0.2);
+    --text: #e8eaf2;
+    --muted: #6b7099;
+    --green: #57f287;
+    --yellow: #fee75c;
+    --red: #ed4245;
+    --discord-bg: #313338;
+    --discord-text: #dbdee1;
+    --font: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: fadeDown 0.5s ease both;
+  }
+
+  .logo {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 0 30px var(--accent-glow), 0 4px 20px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--text), var(--muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .header-text p {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 5px;
+    width: fit-content;
+    animation: fadeDown 0.5s 0.05s ease both;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+
+  .tab:not(.active):hover { color: var(--text); background: var(--surface2); }
+
+  /* SECTION PANELS */
+  .section { display: none; flex-direction: column; gap: 16px; }
+  .section.active { display: flex; }
+
+  /* TEMPLATES GRID */
+  .templates-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+
+  .template-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .template-card:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+
+  .template-card .t-icon { font-size: 22px; }
+  .template-card .t-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .template-card .t-desc { font-size: 11px; color: var(--muted); }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .toolbar-sep {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  .fmt-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    min-width: 34px;
+    text-align: center;
+  }
+
+  .fmt-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  /* MAIN EDITOR AREA */
+  .editor-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 700px) {
+    .editor-area { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .char-counter {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .char-counter.warn { color: var(--yellow); }
+  .char-counter.danger { color: var(--red); }
+
+  textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    padding: 16px;
+    resize: none;
+    min-height: 360px;
+  }
+
+  textarea::placeholder { color: var(--muted); opacity: 0.4; }
+
+  .preview-body {
+    flex: 1;
+    padding: 16px 20px;
+    overflow-y: auto;
+    min-height: 360px;
+    background: var(--discord-bg);
+  }
+
+  /* DISCORD RENDER */
+  .d-h1 { font-size: 22px; font-weight: 700; color: #f2f3f5; margin: 6px 0; border-bottom: 1px solid #3c3f45; padding-bottom: 6px; font-family: var(--font); }
+  .d-h2 { font-size: 18px; font-weight: 700; color: #f2f3f5; margin: 4px 0; font-family: var(--font); }
+  .d-h3 { font-size: 15px; font-weight: 700; color: #f2f3f5; margin: 3px 0; font-family: var(--font); }
+  .d-p { color: var(--discord-text); font-size: 15px; line-height: 1.4; margin: 2px 0; font-family: 'gg sans', 'Noto Sans', sans-serif; }
+  .d-space { height: 8px; }
+  .d-hr { border: none; border-top: 1px solid #3c3f45; margin: 10px 0; }
+  .d-quote { display: flex; gap: 10px; align-items: stretch; margin: 4px 0; }
+  .d-quote-bar { width: 4px; background: #4e5058; border-radius: 4px; flex-shrink: 0; }
+  .d-quote-text { color: var(--discord-text); font-size: 15px; line-height: 1.4; }
+  .d-bullet { display: flex; gap: 8px; color: var(--discord-text); font-size: 15px; line-height: 1.4; padding-left: 10px; margin: 1px 0; }
+  .d-small { font-size: 11px; color: #80848e; margin-top: 2px; }
+  .d-code { font-family: var(--mono); font-size: 13px; background: #2b2d31; color: #e9edef; padding: 1px 5px; border-radius: 3px; }
+  .d-codeblock { background: #2b2d31; border: 1px solid #1e1f22; border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: #e9edef; overflow-x: auto; margin: 6px 0; white-space: pre; }
+  .d-spoiler { background: #2e3035; color: #2e3035; border-radius: 3px; padding: 0 3px; cursor: pointer; }
+  .d-spoiler:hover { color: var(--discord-text); }
+  .d-bold { font-weight: 700; }
+  .d-italic { font-style: italic; }
+  .d-under { text-decoration: underline; }
+  .d-strike { text-decoration: line-through; }
+
+  /* BOTTOM BA
