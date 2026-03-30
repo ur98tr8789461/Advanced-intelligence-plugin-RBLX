@@ -310,4 +310,1250 @@
   .d-under { text-decoration: underline; }
   .d-strike { text-decoration: line-through; }
 
-  /* BOTTOM BA
+  /* BOTTOM BAR */
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hint { font-size: 11px; color: var(--muted); font-family: var(--mono); flex: 1; }
+
+  .btn {
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border-bright); }
+
+  .btn-danger { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-danger:hover { color: var(--red); border-color: var(--red); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .btn-primary:hover { background: #4752c4; transform: translateY(-1px); box-shadow: 0 4px 24px var(--accent-glow); }
+  .btn-primary.success { background: var(--green); color: #000; box-shadow: 0 0 20px rgba(87,242,135,0.25); }
+
+  /* AI PANEL */
+  .ai-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .ai-head {
+    padding: 14px 18px;
+    background: linear-gradient(90deg, rgba(88,101,242,0.12), rgba(235,69,158,0.08));
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ai-badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  .ai-title { font-size: 14px; font-weight: 700; }
+  .ai-sub { font-size: 12px; color: var(--muted); margin-left: auto; font-family: var(--mono); }
+
+  .ai-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+  .ai-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width:600px) { .ai-row { grid-template-columns: 1fr; } }
+
+  .field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: var(--mono); display: block; margin-bottom: 6px; }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .field select option { background: var(--surface2); }
+
+  .ai-generate-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 24px var(--accent-glow);
+    align-self: flex-start;
+  }
+
+  .ai-generate-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 30px var(--accent-glow); }
+  .ai-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .ai-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .ai-generate-btn.loading .ai-spinner { display: block; }
+  .ai-generate-btn.loading .btn-text { opacity: 0.7; }
+
+  /* DRAFTS */
+  .drafts-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .draft-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.15s;
+  }
+
+  .draft-item:hover { border-color: var(--border-bright); }
+
+  .draft-name { font-size: 14px; font-weight: 600; flex: 1; }
+  .draft-date { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+  .draft-actions { display: flex; gap: 6px; }
+
+  .draft-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .draft-btn:hover { color: var(--text); border-color: var(--border-bright); }
+  .draft-btn.load:hover { color: var(--accent); border-color: var(--accent); }
+  .draft-btn.del:hover { color: var(--red); border-color: var(--red); }
+
+  .no-drafts { color: var(--muted); font-size: 13px; text-align: center; padding: 32px; font-family: var(--mono); }
+
+  /* SAVE DRAFT ROW */
+  .save-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .save-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .save-row input:focus { border-color: var(--accent); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.25s;
+    pointer-events: none;
+    font-family: var(--font);
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  /* WEBHOOK TAB */
+  .webhook-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media(max-width:720px) { .webhook-layout { grid-template-columns: 1fr; } }
+
+  .webhook-col { display: flex; flex-direction: column; gap: 16px; }
+
+  .wh-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .wh-head {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .wh-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  .wh-title { font-size: 14px; font-weight: 700; }
+
+  .wh-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+  .wh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width:500px) { .wh-row { grid-template-columns: 1fr; } }
+
+  .wh-url-row { display: flex; gap: 8px; align-items: center; }
+  .wh-url-row input { flex: 1; }
+
+  .wh-toggle-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .wh-toggle-btn:hover { border-color: var(--border-bright); color: var(--text); }
+
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 5px; font-family: var(--mono); }
+  .field-required { color: var(--red); }
+  .field-opt { color: var(--muted); font-size: 10px; font-weight: 400; }
+
+  .wh-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+  .wh-saved-label { display: flex; align-items: center; justify-content: space-between; }
+
+  .wh-save-link {
+    background: none; border: none;
+    color: var(--accent); font-family: var(--font); font-size: 12px; font-weight: 600;
+    cursor: pointer; padding: 0; transition: opacity 0.15s;
+  }
+  .wh-save-link:hover { opacity: 0.75; }
+
+  .saved-wh-list { display: flex; flex-direction: column; gap: 6px; min-height: 40px; }
+
+  .saved-wh-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+  .saved-wh-item:hover { border-color: var(--border-bright); }
+
+  .swh-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .swh-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .swh-url { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+  .swh-actions { display: flex; gap: 4px; }
+
+  .swh-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .swh-btn:hover { color: var(--text); border-color: var(--border-bright); }
+  .swh-btn.load:hover { color: var(--accent); border-color: var(--accent); }
+  .swh-btn.del:hover { color: var(--red); border-color: var(--red); }
+
+  .no-webhooks { font-size: 12px; color: var(--muted); font-family: var(--mono); padding: 8px 0; }
+
+  /* FAKE DISCORD PREVIEW */
+  .wh-preview-box {
+    background: #313338;
+    margin: 0;
+    border-bottom: 1px solid #1e1f22;
+  }
+
+  .fake-discord-header {
+    background: #2b2d31;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #1e1f22;
+  }
+
+  .fake-hash { color: #80848e; font-size: 18px; font-weight: 700; }
+  .fake-channel { color: #f2f3f5; font-size: 14px; font-weight: 600; font-family: var(--font); }
+
+  .fake-message {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    align-items: flex-start;
+  }
+
+  .fake-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #5865f2;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .fake-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .fake-msg-body { flex: 1; min-width: 0; }
+
+  .fake-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f2f3f5;
+    margin-bottom: 4px;
+    font-family: var(--font);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fake-name::after {
+    content: 'BOT';
+    font-size: 9px;
+    font-weight: 700;
+    background: #5865f2;
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+    font-family: var(--mono);
+  }
+
+  .fake-content { max-height: 280px; overflow-y: auto; }
+
+  .wh-send-bar {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .wh-status { flex: 1; font-size: 12px; font-family: var(--mono); color: var(--muted); }
+  .wh-status.ok { color: var(--green); }
+  .wh-status.err { color: var(--red); }
+
+  .wh-send-btn {
+    background: linear-gradient(135deg, #57f287, #3ba55c);
+    color: #000;
+    border: none;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 800;
+    padding: 11px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 20px rgba(87,242,135,0.2);
+  }
+  .wh-send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(87,242,135,0.3); }
+  .wh-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* SEND LOG */
+  .send-log {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+
+  .log-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .log-dot.ok { background: var(--green); }
+  .log-dot.err { background: var(--red); }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg { color: var(--text); flex: 1; }
+  .log-status { color: var(--muted); }
+
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">📣</div>
+    <div class="header-text">
+      <h1>Discord Announcement Maker</h1>
+      <p>write → format → preview → copy</p>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('editor')">✏️ Editor</button>
+    <button class="tab" onclick="switchTab('ai')">✨ AI Generate</button>
+    <button class="tab" onclick="switchTab('templates')">📋 Templates</button>
+    <button class="tab" onclick="switchTab('drafts')">💾 Drafts</button>
+    <button class="tab" onclick="switchTab('webhook')">🚀 Send</button>
+  </div>
+
+  <!-- EDITOR TAB -->
+  <div id="tab-editor" class="section active">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="fmt-btn" title="Heading 1" onclick="applyFmt('h1')">H1</button>
+      <button class="fmt-btn" title="Heading 2" onclick="applyFmt('h2')">H2</button>
+      <button class="fmt-btn" title="Heading 3" onclick="applyFmt('h3')">H3</button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" title="Bold" onclick="applyFmt('bold')"><b>B</b></button>
+      <button class="fmt-btn" title="Italic" onclick="applyFmt('italic')"><i>I</i></button>
+      <button class="fmt-btn" title="Underline" onclick="applyFmt('under')"><u>U</u></button>
+      <button class="fmt-btn" title="Strikethrough" onclick="applyFmt('strike')"><s>S</s></button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" title="Block Quote" onclick="applyFmt('quote')">❝</button>
+      <button class="fmt-btn" title="Multi Quote" onclick="applyFmt('mquote')">❞❞</button>
+      <button class="fmt-btn" title="Bullet" onclick="applyFmt('bullet')">•</button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" title="Inline Code" onclick="applyFmt('code')">`c`</button>
+      <button class="fmt-btn" title="Code Block" onclick="applyFmt('codeblock')">{ }</button>
+      <div class="toolbar-sep"></div>
+      <button class="fmt-btn" title="Spoiler" onclick="applyFmt('spoiler')">👁</button>
+      <button class="fmt-btn" title="Divider" onclick="applyFmt('divider')">─</button>
+      <button class="fmt-btn" title="Small Text" onclick="applyFmt('small')">xs</button>
+    </div>
+
+    <!-- Editor + Preview -->
+    <div class="editor-area">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-label">✏️ Markdown</span>
+          <span class="char-counter" id="charCount">0 / 4000</span>
+        </div>
+        <textarea id="editor" placeholder="Write your announcement here... or use AI Generate to start." oninput="onEdit()" onmouseup="saveSelection()" onkeyup="saveSelection()"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-label">👁 Discord Preview</span>
+          <span class="panel-label" style="color:var(--accent)">Live</span>
+        </div>
+        <div class="preview-body" id="preview"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+      <span class="hint">Select text, then click a format button to wrap it</span>
+      <button class="btn btn-danger" onclick="clearEditor()">Clear</button>
+      <button class="btn btn-ghost" onclick="exportTxt()">Export .txt</button>
+      <button class="btn btn-primary" id="copyBtn" onclick="copyToDiscord()">Copy for Discord</button>
+    </div>
+  </div>
+
+  <!-- AI TAB -->
+  <div id="tab-ai" class="section">
+    <div class="ai-panel">
+      <div class="ai-head">
+        <span class="ai-badge">AI POWERED</span>
+        <span class="ai-title">Announcement Generator</span>
+        <span class="ai-sub">Claude Sonnet</span>
+      </div>
+      <div class="ai-body">
+        <div class="ai-row">
+          <div class="field">
+            <label>Announcement Type</label>
+            <select id="aiType">
+              <option value="general announcement">📣 General Announcement</option>
+              <option value="server event">🎉 Server Event</option>
+              <option value="update or changelog">🔔 Update / Changelog</option>
+              <option value="important notice or warning">⚠️ Important Notice</option>
+              <option value="giveaway">🎁 Giveaway</option>
+              <option value="new member welcome">👋 Welcome Message</option>
+              <option value="rules or guidelines">📜 Rules / Guidelines</option>
+              <option value="partnership announcement">🤝 Partnership</option>
+              <option value="server milestone">🏆 Milestone</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tone</label>
+            <select id="aiTone">
+              <option value="friendly and casual">😄 Friendly & Casual</option>
+              <option value="professional and formal">👔 Professional</option>
+              <option value="hype and energetic">🔥 Hype & Energetic</option>
+              <option value="serious and urgent">⚠️ Serious & Urgent</option>
+              <option value="playful and fun">🎮 Playful & Fun</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Server / Community Name (optional)</label>
+          <input type="text" id="aiServer" placeholder="e.g. Midnight Gaming, Dev Hub..."/>
+        </div>
+        <div class="field">
+          <label>Your Ideas / Key Points</label>
+          <textarea id="aiPrompt" placeholder="Describe what you want to announce. Include key details, dates, or anything important..."></textarea>
+        </div>
+        <button class="ai-generate-btn" id="aiBtn" onclick="generateAI()">
+          <div class="ai-spinner" id="aiSpinner"></div>
+          <span class="btn-text">✨ Generate Announcement</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES TAB -->
+  <div id="tab-templates" class="section">
+    <span class="templates-label">Pick a template to load into the editor</span>
+    <div class="templates-grid" id="templatesGrid"></div>
+  </div>
+
+  <!-- WEBHOOK TAB -->
+  <div id="tab-webhook" class="section">
+
+    <div class="webhook-layout">
+
+      <!-- LEFT: Config -->
+      <div class="webhook-col">
+        <div class="wh-panel">
+          <div class="wh-head">
+            <span class="wh-badge">WEBHOOK</span>
+            <span class="wh-title">Send to Discord</span>
+          </div>
+          <div class="wh-body">
+
+            <div class="field">
+              <label>Webhook URL <span class="field-required">*</span></label>
+              <div class="wh-url-row">
+                <input type="password" id="whUrl" placeholder="https://discord.com/api/webhooks/..."/>
+                <button class="wh-toggle-btn" onclick="toggleWhUrl()" title="Show/hide URL">👁</button>
+              </div>
+              <div class="field-hint">Found in: Channel Settings → Integrations → Webhooks</div>
+            </div>
+
+            <div class="wh-row">
+              <div class="field">
+                <label>Bot Username <span class="field-opt">(optional)</span></label>
+                <input type="text" id="whUsername" placeholder="e.g. Announcements Bot"/>
+              </div>
+              <div class="field">
+                <label>Avatar URL <span class="field-opt">(optional)</span></label>
+                <input type="text" id="whAvatar" placeholder="https://i.imgur.com/..."/>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Thread ID <span class="field-opt">(optional — for forum/thread channels)</span></label>
+              <input type="text" id="whThread" placeholder="e.g. 1234567890123456789"/>
+            </div>
+
+            <div class="wh-divider"></div>
+
+            <div class="wh-saved-label">
+              <span class="panel-label">Saved Webhooks</span>
+              <button class="wh-save-link" onclick="saveWebhook()">+ Save current</button>
+            </div>
+            <div id="savedWebhooks" class="saved-wh-list"></div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Preview + Send -->
+      <div class="webhook-col">
+        <div class="wh-panel">
+          <div class="wh-head">
+            <span class="wh-title">Message Preview</span>
+            <span class="wh-badge" id="msgLenBadge">0 chars</span>
+          </div>
+          <div class="wh-preview-box">
+            <!-- fake discord UI chrome -->
+            <div class="fake-discord-header">
+              <span class="fake-hash">#</span>
+              <span class="fake-channel">announcements</span>
+            </div>
+            <div class="fake-message">
+              <div class="fake-avatar" id="previewAvatar">🤖</div>
+              <div class="fake-msg-body">
+                <div class="fake-name" id="previewName">Webhook Bot</div>
+                <div class="fake-content" id="webhookPreviewContent">
+                  <span style="color:var(--muted);font-size:13px;font-family:var(--mono)">Your message will appear here...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wh-send-bar">
+            <div class="wh-status" id="whStatus"></div>
+            <button class="wh-send-btn" id="sendBtn" onclick="sendWebhook()">
+              <div class="ai-spinner" id="sendSpinner"></div>
+              <span class="btn-text">🚀 Send to Discord</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Send log -->
+    <div id="sendLog" class="send-log" style="display:none">
+      <div class="panel-label" style="margin-bottom:8px">📋 Send Log</div>
+      <div id="sendLogItems"></div>
+    </div>
+
+  </div>
+
+  <!-- DRAFTS TAB -->
+  <div id="tab-drafts" class="section">
+    <div class="save-row">
+      <input type="text" id="draftName" placeholder="Draft name..."/>
+      <button class="btn btn-primary" onclick="saveDraft()">💾 Save Current</button>
+    </div>
+    <div class="drafts-list" id="draftsList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let selStart = 0, selEnd = 0;
+
+const editor = document.getElementById('editor');
+const preview = document.getElementById('preview');
+const charCount = document.getElementById('charCount');
+
+// ─── TEMPLATES ───────────────────────────────────────────
+const TEMPLATES = [
+  {
+    icon: '📣', name: 'General Announcement', desc: 'All-purpose announcement',
+    content: `# 📣 Announcement\n\n**Hey @everyone!**\n\nWe have some exciting news to share with the community.\n\n> The main message goes here. Keep it clear and engaging.\n\n- Important point one\n- Important point two\n- Important point three\n\n---\n\n-# Have questions? Open a ticket or ask in #general.`
+  },
+  {
+    icon: '🎉', name: 'Event', desc: 'Server events & activities',
+    content: `# 🎉 Event Announcement\n\n**Hey @everyone, we're hosting an event!**\n\n**📅 When:** Saturday, January 1st @ 7PM EST\n**📍 Where:** #event-voice\n**🎯 What:** Describe the event here\n\n> Everyone is welcome — come hang out!\n\n- React with ✅ to sign up\n- Bring your friends\n\n---\n\n-# See you there!`
+  },
+  {
+    icon: '🔔', name: 'Update / Changelog', desc: 'Bot, server, or project updates',
+    content: `## 🔔 Update v2.0\n\n### ✅ What's New\n- New feature one added\n- Improved performance for something\n- New channel: #announcements\n\n### 🐛 Bug Fixes\n- Fixed an issue where users couldn't...\n- Resolved a crash with...\n\n### 🗑️ Removed\n- Old feature deprecated\n\n---\n\n-# Thanks for your patience and feedback!`
+  },
+  {
+    icon: '⚠️', name: 'Important Notice', desc: 'Warnings, rules, urgent info',
+    content: `## ⚠️ Important Notice\n\n**Please read this carefully.**\n\n> This message affects all members of the server.\n\n**Summary:** Describe what's happening and why it matters.\n\n**What you need to do:**\n- Step one\n- Step two\n\n---\n\n||Additional details or spoiler content here.||\n\n-# Last updated: Today`
+  },
+  {
+    icon: '🎁', name: 'Giveaway', desc: 'Prizes and competitions',
+    content: `# 🎁 GIVEAWAY TIME!\n\n**@everyone — we're giving away something awesome!**\n\n**🏆 Prize:** Describe the prize here\n**📅 Ends:** Date & Time\n**🎟️ How to Enter:**\n- React with 🎉 below\n- Follow our socials (optional)\n- Invite a friend for bonus entries\n\n> Winner announced in #winners!\n\n---\n\n**Good luck everyone! 🍀**\n-# Must be 13+ to enter. One entry per person.`
+  },
+  {
+    icon: '👋', name: 'Welcome', desc: 'New member greetings',
+    content: `# 👋 Welcome to the Server!\n\n**We're so glad you're here.**\n\n> Take a moment to read the rules and get settled in.\n\n**Quick Start:**\n- 📜 Read #rules\n- 🎭 Grab roles in #roles\n- 💬 Introduce yourself in #introductions\n- 🙋 Ask questions in #help\n\n---\n\n**We hope you enjoy your stay!** 🎉\n-# Questions? Ping a @Moderator anytime.`
+  },
+  {
+    icon: '📜', name: 'Rules', desc: 'Server rules & guidelines',
+    content: `# 📜 Server Rules\n\n**Please follow these rules to keep our community safe and fun.**\n\n**1. Be Respectful**\n> Treat everyone with kindness. No harassment, hate speech, or discrimination.\n\n**2. No Spam**\n> Don't flood channels with repeated messages or emotes.\n\n**3. Keep it On-Topic**\n> Use the right channels for the right topics.\n\n**4. No NSFW Content**\n> Keep all content appropriate for all ages.\n\n**5. Follow Discord TOS**\n> All Discord Terms of Service apply here.\n\n---\n\n-# Breaking rules may result in a mute, kick, or ban.`
+  },
+  {
+    icon: '🤝', name: 'Partnership', desc: 'Collaborations & partner servers',
+    content: `# 🤝 New Partnership!\n\n**We're excited to announce a new partnership!**\n\n**Partner:** Server / Brand Name\n**About them:** Brief description of who they are.\n\n> Check them out — we think you'll love what they do!\n\n**🔗 Join their server:** [Click Here](https://discord.gg/invite)\n\n---\n\n-# Interested in partnering with us? Open a ticket!`
+  },
+  {
+    icon: '🏆', name: 'Milestone', desc: 'Member counts & achievements',
+    content: `# 🏆 We hit a milestone!\n\n**@everyone — we just reached [NUMBER] members!**\n\n> This wouldn't be possible without every single one of you. Thank you! 🙏\n\n**To celebrate:**\n- 🎁 Giveaway happening soon\n- 🔓 New channels unlocked\n- ✨ Special roles available\n\n---\n\n**Here's to the next milestone! 🚀**\n-# Thank you for being part of this community.`
+  },
+];
+
+// ─── RENDER TEMPLATES ──────────────────────────────────────
+function renderTemplates() {
+  const grid = document.getElementById('templatesGrid');
+  grid.innerHTML = TEMPLATES.map((t, i) => `
+    <div class="template-card" onclick="loadTemplate(${i})">
+      <div class="t-icon">${t.icon}</div>
+      <div class="t-name">${t.name}</div>
+      <div class="t-desc">${t.desc}</div>
+    </div>
+  `).join('');
+}
+
+function loadTemplate(i) {
+  editor.value = TEMPLATES[i].content;
+  onEdit();
+  switchTab('editor');
+  showToast(`Loaded: ${TEMPLATES[i].name}`, 'success');
+}
+
+renderTemplates();
+
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const tabs = ['editor','ai','templates','drafts','webhook'];
+  document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active');
+  if (name === 'drafts') renderDrafts();
+  if (name === 'webhook') { syncWebhookPreview(); renderSavedWebhooks(); }
+}
+
+// ─── EDITOR ──────────────────────────────────────────────
+function onEdit() {
+  const val = editor.value;
+  const len = val.length;
+  charCount.textContent = len + ' / 4000';
+  charCount.className = 'char-counter' + (len > 3800 ? ' danger' : len > 3000 ? ' warn' : '');
+  renderPreview(val);
+}
+
+function saveSelection() {
+  selStart = editor.selectionStart;
+  selEnd = editor.selectionEnd;
+}
+
+function applyFmt(type) {
+  const val = editor.value;
+  const sel = val.substring(selStart, selEnd) || 'text';
+  let result = '';
+  const cursor = { start: selStart, end: selEnd };
+
+  switch(type) {
+    case 'h1': result = `# ${sel}`; break;
+    case 'h2': result = `## ${sel}`; break;
+    case 'h3': result = `### ${sel}`; break;
+    case 'bold': result = `**${sel}**`; break;
+    case 'italic': result = `*${sel}*`; break;
+    case 'under': result = `__${sel}__`; break;
+    case 'strike': result = `~~${sel}~~`; break;
+    case 'quote': result = `> ${sel}`; break;
+    case 'mquote': result = `>>> ${sel}`; break;
+    case 'bullet': result = `- ${sel}`; break;
+    case 'code': result = `\`${sel}\``; break;
+    case 'codeblock': result = '```\n' + sel + '\n```'; break;
+    case 'spoiler': result = `||${sel}||`; break;
+    case 'divider': result = `---`; break;
+    case 'small': result = `-# ${sel}`; break;
+    default: result = sel;
+  }
+
+  editor.value = val.slice(0, selStart) + result + val.slice(selEnd);
+  onEdit();
+}
+
+function clearEditor() {
+  if (editor.value && confirm('Clear the editor?')) {
+    editor.value = '';
+    onEdit();
+  }
+}
+
+function copyToDiscord() {
+  const btn = document.getElementById('copyBtn');
+  navigator.clipboard.writeText(editor.value).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('success');
+    setTimeout(() => { btn.textContent = 'Copy for Discord'; btn.classList.remove('success'); }, 2000);
+    showToast('Copied to clipboard!', 'success');
+  });
+}
+
+function exportTxt() {
+  if (!editor.value.trim()) { showToast('Nothing to export.', 'error'); return; }
+  const blob = new Blob([editor.value], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'announcement.txt';
+  a.click();
+  showToast('Exported as announcement.txt', 'success');
+}
+
+// ─── PREVIEW RENDERER ────────────────────────────────────
+function renderPreview(text) {
+  if (!text.trim()) { preview.innerHTML = '<p style="color:var(--muted);font-family:var(--mono);font-size:13px">Preview will appear here...</p>'; return; }
+  const lines = text.split('\n');
+  let html = '';
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.startsWith('```')) {
+      let code = '';
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) { code += escHtml(lines[i]) + '\n'; i++; }
+      html += `<pre class="d-codeblock">${code.trimEnd()}</pre>`;
+    } else if (line.startsWith('# ')) {
+      html += `<h1 class="d-h1">${inline(line.slice(2))}</h1>`;
+    } else if (line.startsWith('## ')) {
+      html += `<h2 class="d-h2">${inline(line.slice(3))}</h2>`;
+    } else if (line.startsWith('### ')) {
+      html += `<h3 class="d-h3">${inline(line.slice(4))}</h3>`;
+    } else if (line.startsWith('-# ')) {
+      html += `<p class="d-small">${inline(line.slice(3))}</p>`;
+    } else if (line.startsWith('>>> ')) {
+      html += `<div class="d-quote"><div class="d-quote-bar"></div><span class="d-quote-text">${inline(line.slice(4))}</span></div>`;
+    } else if (line.startsWith('> ')) {
+      html += `<div class="d-quote"><div class="d-quote-bar"></div><span class="d-quote-text">${inline(line.slice(2))}</span></div>`;
+    } else if (line.trim() === '---') {
+      html += `<hr class="d-hr"/>`;
+    } else if (line.startsWith('- ')) {
+      html += `<div class="d-bullet"><span>•</span><span>${inline(line.slice(2))}</span></div>`;
+    } else if (line.trim() === '') {
+      html += `<div class="d-space"></div>`;
+    } else {
+      html += `<p class="d-p">${inline(line)}</p>`;
+    }
+    i++;
+  }
+  preview.innerHTML = html;
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function inline(text) {
+  return escHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="d-bold">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em class="d-italic">$1</em>')
+    .replace(/__(.+?)__/g, '<span class="d-under">$1</span>')
+    .replace(/~~(.+?)~~/g, '<span class="d-strike">$1</span>')
+    .replace(/`(.+?)`/g, '<code class="d-code">$1</code>')
+    .replace(/\|\|(.+?)\|\|/g, '<span class="d-spoiler">$1</span>');
+}
+
+// ─── DRAFTS ──────────────────────────────────────────────
+function getDrafts() {
+  try { return JSON.parse(localStorage.getItem('discord_drafts') || '[]'); } catch { return []; }
+}
+
+function saveDraft() {
+  const name = document.getElementById('draftName').value.trim() || ('Draft ' + new Date().toLocaleDateString());
+  const content = editor.value;
+  if (!content.trim()) { showToast('Nothing to save.', 'error'); return; }
+  const drafts = getDrafts();
+  drafts.unshift({ id: Date.now(), name, content, date: new Date().toLocaleString() });
+  localStorage.setItem('discord_drafts', JSON.stringify(drafts.slice(0, 20)));
+  document.getElementById('draftName').value = '';
+  renderDrafts();
+  showToast('Draft saved!', 'success');
+}
+
+function renderDrafts() {
+  const drafts = getDrafts();
+  const list = document.getElementById('draftsList');
+  if (!drafts.length) {
+    list.innerHTML = '<div class="no-drafts">No saved drafts yet.<br>Write something and save it!</div>';
+    return;
+  }
+  list.innerHTML = drafts.map(d => `
+    <div class="draft-item">
+      <div>
+        <div class="draft-name">${escHtml(d.name)}</div>
+        <div class="draft-date">${d.date}</div>
+      </div>
+      <div class="draft-actions">
+        <button class="draft-btn load" onclick="loadDraft(${d.id})">Load</button>
+        <button class="draft-btn del" onclick="deleteDraft(${d.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadDraft(id) {
+  const draft = getDrafts().find(d => d.id === id);
+  if (draft) {
+    editor.value = draft.content;
+    onEdit();
+    switchTab('editor');
+    showToast('Draft loaded!', 'success');
+  }
+}
+
+function deleteDraft(id) {
+  const drafts = getDrafts().filter(d => d.id !== id);
+  localStorage.setItem('discord_drafts', JSON.stringify(drafts));
+  renderDrafts();
+  showToast('Draft deleted.');
+}
+
+// ─── AI GENERATE ─────────────────────────────────────────
+async function generateAI() {
+  const type = document.getElementById('aiType').value;
+  const tone = document.getElementById('aiTone').value;
+  const server = document.getElementById('aiServer').value.trim();
+  const prompt = document.getElementById('aiPrompt').value.trim();
+
+  if (!prompt) { showToast('Please describe your announcement idea.', 'error'); return; }
+
+  const btn = document.getElementById('aiBtn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  const systemPrompt = `You are an expert Discord community manager. Generate a Discord announcement using Discord markdown formatting.
+
+Discord markdown rules:
+- # Heading 1, ## Heading 2, ### Heading 3
+- **bold**, *italic*, __underline__, ~~strikethrough~~
+- > block quote, >>> multi-line block quote
+- \`inline code\`, \`\`\`code block\`\`\`
+- - bullet list items
+- || spoiler ||
+- --- for dividers
+- -# for small text
+
+RULES:
+- Use emojis naturally
+- Use Discord markdown extensively - headings, bold key info, quotes for emphasis
+- Tone must be: ${tone}
+- Type: ${tone}
+- Output ONLY the announcement markdown, nothing else, no explanations`;
+
+  const userMsg = `Create a ${type} announcement${server ? ` for the "${server}" Discord server` : ''}.
+Tone: ${tone}
+Key details: ${prompt}
+
+Use rich Discord formatting with headings, bold text, bullet points, quotes, and dividers. Make it engaging and well-structured.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMsg }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('').trim();
+
+    if (text) {
+      editor.value = text;
+      onEdit();
+      switchTab('editor');
+      showToast('Announcement generated! ✨', 'success');
+    } else {
+      showToast('Generation failed. Try again.', 'error');
+    }
+  } catch(e) {
+    showToast('Error connecting to AI.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+// ─── WEBHOOK ─────────────────────────────────────────────
+function toggleWhUrl() {
+  const inp = document.getElementById('whUrl');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function syncWebhookPreview() {
+  const content = editor.value;
+  const name = document.getElementById('whUsername').value.trim() || 'Webhook Bot';
+  const avatar = document.getElementById('whAvatar').value.trim();
+
+  document.getElementById('previewName').textContent = name;
+  document.getElementById('msgLenBadge').textContent = content.length + ' chars';
+
+  // Avatar
+  const avatarEl = document.getElementById('previewAvatar');
+  if (avatar) {
+    avatarEl.innerHTML = `<img src="${escHtml(avatar)}" onerror="this.parentElement.innerHTML='🤖'"/>`;
+  } else {
+    avatarEl.innerHTML = '🤖';
+  }
+
+  // Content
+  const previewEl = document.getElementById('webhookPreviewContent');
+  if (content.trim()) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = '';
+    renderPreviewInto(content, previewEl);
+  } else {
+    previewEl.innerHTML = '<span style="color:var(--muted);font-size:13px;font-family:var(--mono)">Your message will appear here...</span>';
+  }
+}
+
+function renderPreviewInto(text, el) {
+  const lines = text.split('\n');
+  let html = '';
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.startsWith('```')) {
+      let code = '';
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) { code += escHtml(lines[i]) + '\n'; i++; }
+      html += `<pre class="d-codeblock">${code.trimEnd()}</pre>`;
+    } else if (line.startsWith('# ')) { html += `<h1 class="d-h1">${inline(line.slice(2))}</h1>`;
+    } else if (line.startsWith('## ')) { html += `<h2 class="d-h2">${inline(line.slice(3))}</h2>`;
+    } else if (line.startsWith('### ')) { html += `<h3 class="d-h3">${inline(line.slice(4))}</h3>`;
+    } else if (line.startsWith('-# ')) { html += `<p class="d-small">${inline(line.slice(3))}</p>`;
+    } else if (line.startsWith('>>> ')) { html += `<div class="d-quote"><div class="d-quote-bar"></div><span class="d-quote-text">${inline(line.slice(4))}</span></div>`;
+    } else if (line.startsWith('> ')) { html += `<div class="d-quote"><div class="d-quote-bar"></div><span class="d-quote-text">${inline(line.slice(2))}</span></div>`;
+    } else if (line.trim() === '---') { html += `<hr class="d-hr"/>`;
+    } else if (line.startsWith('- ')) { html += `<div class="d-bullet"><span>•</span><span>${inline(line.slice(2))}</span></div>`;
+    } else if (line.trim() === '') { html += `<div class="d-space"></div>`;
+    } else { html += `<p class="d-p">${inline(line)}</p>`; }
+    i++;
+  }
+  el.innerHTML = html;
+}
+
+// Live sync when typing in webhook tab inputs
+document.addEventListener('DOMContentLoaded', () => {
+  ['whUsername','whAvatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', syncWebhookPreview);
+  });
+});
+
+// Saved webhooks
+function getSavedWebhooks() {
+  try { return JSON.parse(localStorage.getItem('discord_webhooks') || '[]'); } catch { return []; }
+}
+
+function saveWebhook() {
+  const url = document.getElementById('whUrl').value.trim();
+  if (!url || !url.startsWith('https://discord.com/api/webhooks/')) {
+    showToast('Enter a valid Discord webhook URL first.', 'error'); return;
+  }
+  const name = prompt('Name this webhook (e.g. #announcements):');
+  if (!name) return;
+  const hooks = getSavedWebhooks();
+  if (hooks.find(h => h.url === url)) { showToast('This webhook is already saved.', 'error'); return; }
+  hooks.unshift({ id: Date.now(), name, url, username: document.getElementById('whUsername').value.trim(), avatar: document.getElementById('whAvatar').value.trim() });
+  localStorage.setItem('discord_webhooks', JSON.stringify(hooks.slice(0, 10)));
+  renderSavedWebhooks();
+  showToast('Webhook saved!', 'success');
+}
+
+function renderSavedWebhooks() {
+  const hooks = getSavedWebhooks();
+  const list = document.getElementById('savedWebhooks');
+  if (!hooks.length) {
+    list.innerHTML = '<div class="no-webhooks">No saved webhooks. Fill in a URL and click "+ Save current".</div>';
+    return;
+  }
+  list.innerHTML = hooks.map(h => `
+    <div class="saved-wh-item">
+      <div class="swh-dot"></div>
+      <div style="flex:1;min-width:0">
+        <div class="swh-name">${escHtml(h.name)}</div>
+        <div class="swh-url">${escHtml(h.url.slice(0,50))}…</div>
+      </div>
+      <div class="swh-actions">
+        <button class="swh-btn load" onclick="loadWebhook(${h.id})">Load</button>
+        <button class="swh-btn del" onclick="deleteWebhook(${h.id})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadWebhook(id) {
+  const h = getSavedWebhooks().find(w => w.id === id);
+  if (!h) return;
+  document.getElementById('whUrl').value = h.url;
+  document.getElementById('whUsername').value = h.username || '';
+  document.getElementById('whAvatar').value = h.avatar || '';
+  syncWebhookPreview();
+  showToast('Webhook loaded!', 'success');
+}
+
+function deleteWebhook(id) {
+  const hooks = getSavedWebhooks().filter(h => h.id !== id);
+  localStorage.setItem('discord_webhooks', JSON.stringify(hooks));
+  renderSavedWebhooks();
+  showToast('Webhook deleted.');
+}
+
+async function sendWebhook() {
+  const url = document.getElementById('whUrl').value.trim();
+  const content = editor.value.trim();
+  const username = document.getElementById('whUsername').value.trim();
+  const avatar_url = document.getElementById('whAvatar').value.trim();
+  const thread_id = document.getElementById('whThread').value.trim();
+  const status = document.getElementById('whStatus');
+  const btn = document.getElementById('sendBtn');
+
+  if (!url) { showToast('Enter a webhook URL.', 'error'); return; }
+  if (!url.startsWith('https://discord.com/api/webhooks/')) { showToast('That doesn\'t look like a valid Discord webhook URL.', 'error'); return; }
+  if (!content) { showToast('Nothing to send — write something in the editor first.', 'error'); return; }
+  if (content.length > 2000) { showToast('Message too long! Discord webhooks max out at 2000 characters.', 'error'); return; }
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  status.textContent = 'Sending...';
+  status.className = 'wh-status';
+
+  const body = { content };
+  if (username) body.username = username;
+  if (avatar_url) body.avatar_url = avatar_url;
+
+  let sendUrl = url;
+  if (thread_id) sendUrl += `?thread_id=${encodeURIComponent(thread_id)}`;
+
+  try {
+    const res = await fetch(sendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok || res.status === 204) {
+      status.textContent = '✓ Sent successfully!';
+      status.className = 'wh-status ok';
+      showToast('Message sent to Discord! 🚀', 'success');
+      addLogItem(true, username || 'Webhook Bot', url);
+    } else {
+      let errMsg = `Error ${res.status}`;
+      try { const d = await res.json(); errMsg = d.message || errMsg; } catch {}
+      status.textContent = '✗ ' + errMsg;
+      status.className = 'wh-status err';
+      showToast('Send failed: ' + errMsg, 'error');
+      addLogItem(false, username || 'Webhook Bot', url, errMsg);
+    }
+  } catch(e) {
+    status.textContent = '✗ Network error';
+    status.className = 'wh-status err';
+    showToast('Network error — check the URL and try again.', 'error');
+    addLogItem(false, username || 'Webhook Bot', url, 'Network error');
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    setTimeout(() => { status.textContent = ''; status.className = 'wh-status'; }, 5000);
+  }
+}
+
+function addLogItem(ok, name, url, errMsg) {
+  const log = document.getElementById('sendLog');
+  const items = document.getElementById('sendLogItems');
+  log.style.display = 'block';
+  const time = new Date().toLocaleTimeString();
+  const shortUrl = url.replace('https://discord.com/api/webhooks/', 'webhook/').slice(0, 40) + '…';
+  const div = document.createElement('div');
+  div.className = 'log-item';
+  div.innerHTML = `
+    <div class="log-dot ${ok ? 'ok' : 'err'}"></div>
+    <span class="log-time">${time}</span>
+    <span class="log-msg">${ok ? '✓ Sent' : '✗ Failed'} as <strong>${escHtml(name)}</strong></span>
+    <span class="log-status">${ok ? shortUrl : escHtml(errMsg || '')}</span>
+  `;
+  items.prepend(div);
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2500);
+}
+
+// ─── INIT ────────────────────────────────────────────────
+editor.addEventListener('select', saveSelection);
+renderPreview('');
+
+// Keep webhook preview in sync while editing
+editor.addEventListener('input', () => {
+  const active = document.querySelector('#tab-webhook.active');
+  if (active) syncWebhookPreview();
+});
+</script>
+</body>
+</html>
